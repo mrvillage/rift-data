@@ -8,7 +8,7 @@ from ...data.db import execute_query, execute_read_query
 from ...events import dispatch
 
 
-@tasks.loop(minutes=5)
+@tasks.loop(hours=1)
 async def fetch_treasures():
     time = datetime.utcnow()
     query = """
@@ -55,7 +55,7 @@ async def fetch_treasures():
 @fetch_treasures.before_loop
 async def before_loop():
     now = datetime.utcnow()
-    wait = now.replace(minute=2, second=0)
+    wait = now.replace(minute=2, second=6)
     while wait < now:
         wait += timedelta(hours=1)
     await sleep_until(wait)

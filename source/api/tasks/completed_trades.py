@@ -7,7 +7,7 @@ from ...data.db import execute_read_query, execute_query_many
 from ...events import dispatch
 
 
-@tasks.loop(minutes=5)
+@tasks.loop(minutes=2)
 async def fetch_trades():
     time = datetime.utcnow()
     query = """
@@ -62,9 +62,9 @@ async def fetch_trades():
 @fetch_trades.before_loop
 async def before_loop():
     now = datetime.utcnow()
-    wait = now.replace(minute=5, second=0)
+    wait = now.replace(minute=0, second=2)
     while wait < now:
-        wait += timedelta(minutes=5)
+        wait += timedelta(minutes=2)
     await sleep_until(wait)
 
 

@@ -24,7 +24,7 @@ async def city_two():
         return data["data"]
 
 
-@tasks.loop(minutes=5)
+@tasks.loop(minutes=4)
 async def fetch_nations():
     time = datetime.utcnow()
     responses = await asyncio.gather(city_one(), city_two())
@@ -124,7 +124,7 @@ async def before_loop():
     now = datetime.utcnow()
     wait = now.replace(minute=0, second=0)
     while wait < now:
-        wait += timedelta(minutes=5)
+        wait += timedelta(minutes=4)
     print("wait", wait)
     await sleep_until(wait)
 
