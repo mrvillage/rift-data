@@ -20,7 +20,6 @@ async def request(resource):
 
 @tasks.loop(minutes=5)
 async def fetch_prices():
-    print("HALLO")
     start = perf_counter()
     time = datetime.utcnow()
     credit, coal, oil, uranium = await asyncio.gather(
