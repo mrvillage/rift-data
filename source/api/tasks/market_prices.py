@@ -3,7 +3,8 @@ import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
 from ...env import GQLURL, UPDATE_TIMES
-from ...data.db import execute_query_many
+from ...data.db import execute_query_many, execute_read_query
+from ...events import dispatch
 
 
 @tasks.loop(minutes=5)
@@ -30,6 +31,17 @@ async def fetch_market_prices():
     async with aiohttp.request("GET", GQLURL, json={"query": query}) as response:
         data = await response.json()
         data = data["tradeprices"]
+        old = await execute_read_query(
+            """
+            SELECT credit, coal, oil, uranium,
+            lead, iron, bauxite, gasoline, munitions,
+            steel, aluminum, food FROM pricesUPDATE
+            ORDER BY datetime DESC LIMIT 1;
+            """,
+        )
+        old = dict(old)
+        if old != data:
+            await dispatch("market_prices_update", str(time), before=old, after=data)
         await execute_query_many(
             """
             INSERT INTO market_pricesUPDATE (datetime, credit, coal, oil, uranium,
