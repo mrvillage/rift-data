@@ -1,14 +1,14 @@
 import asyncio
 from datetime import datetime, timedelta
 from json import dumps
-from time import perf_counter
 
 import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
 
-from ...data.db import execute_query
+from ...data.db import execute_query, execute_read_query
 from ...env import APIKEY, BASEURL, UPDATE_TIMES
+from ...events import dispatch
 
 
 async def request(resource):
@@ -20,7 +20,6 @@ async def request(resource):
 
 @tasks.loop(minutes=5)
 async def fetch_prices():
-    start = perf_counter()
     time = datetime.utcnow()
     credit, coal, oil, uranium = await asyncio.gather(
         request("credits"),
@@ -56,6 +55,16 @@ async def fetch_prices():
         dumps(aluminum),
         dumps(food),
     )
+    old = await execute_read_query(
+        """
+        SELECT credit, coal, oil, uranium,
+        lead, iron, bauxite, gasoline, munitions, steel,
+        aluminum, food FROM pricesUPDATE ORDER BY datetime DESC LIMIT 1;
+        """,
+    )
+    old = tuple(old[0])
+    if old != data:
+        await dispatch("prices_update", str(time), before=old, after=data)
     await execute_query(
         """
         INSERT INTO pricesUPDATE (datetime, credit, coal, oil, uranium,
@@ -66,8 +75,6 @@ async def fetch_prices():
         *data,
     )
     await UPDATE_TIMES.set_prices(time)
-    end = perf_counter()
-    print(start, end, end - start)
 
 
 @fetch_prices.before_loop

@@ -4,7 +4,8 @@ import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
 from ...env import GQLURL, UPDATE_TIMES
-from ...data.db import execute_query
+from ...data.db import execute_query, execute_read_query
+from ...events import dispatch
 
 
 @tasks.loop(minutes=5)
@@ -30,13 +31,23 @@ async def fetch_treasures():
         for i in data["data"]["treasures"]:
             i["nation"] = i["nation"]["id"]
             treasures.append(i)
+        treasures = dumps(treasures)
+        old = await execute_read_query(
+            """
+            SELECT treasures FROM treasuresUPDATE
+            ORDER BY datetime DESC LIMIT 1;
+            """,
+        )
+        old = old[0]["treasures"]
+        if old != treasures:
+            await dispatch("treasures_update", str(time), before=old, after=treasures)
         await execute_query(
             """
             INSERT INTO treasuresUPDATE (datetime, treasures)
             VALUES ($1, $2);
             """,
             str(time),
-            dumps(treasures),
+            treasures,
         )
         await UPDATE_TIMES.set_treasures(time)
 

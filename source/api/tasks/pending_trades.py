@@ -55,7 +55,7 @@ async def fetch_pending_trades():
                 continue
             if before != after:
                 await dispatch(
-                    "pending_trade_updated", str(time), before=before, after=after
+                    "pending_trade_update", str(time), before=before, after=after
                 )
                 update[after[0]] = after
         for removed in old.values():
