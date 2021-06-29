@@ -218,13 +218,13 @@ async def fetch_wars():
         old_wars = {i["id"]: i for i in old_wars}
         for attack in attacks.values():
             if attack[0] not in old_attacks:
-                await dispatch("new_attack", str(time), attack=attack)
+                await dispatch("attack", str(time), attack=attack)
                 attack_data[attack[0]] = attack
         for after in wars.values():
             try:
                 before = tuple(old_wars[after[0]])
             except KeyError:
-                await dispatch("war_declared", str(time), war=after)
+                await dispatch("war_declaration", str(time), war=after)
                 war_data[after[0]] = after
                 continue
             if before != after:
