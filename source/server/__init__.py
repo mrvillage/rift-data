@@ -1,5 +1,5 @@
 import asyncio
-import aiohttp
+import ssl
 from aiohttp import web
 from aiohttp.http_websocket import WSMsgType
 
@@ -66,7 +66,12 @@ class SocketServer:
     async def start_coro(self):
         self.runner = web.AppRunner(self.server)
         await self.runner.setup()
-        self.site = web.TCPSite(self.runner, "localhost", self.port)
+        self.site = web.TCPSite(
+            self.runner,
+            "localhost",
+            self.port,
+            ssl_context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH),
+        )
         await self.site.start()
 
     def start(self):
