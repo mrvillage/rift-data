@@ -131,7 +131,6 @@ async def before_loop():
     wait = now.replace(minute=0, second=0)
     while wait < now:
         wait += timedelta(minutes=4)
-    print("wait", wait)
     await sleep_until(wait)
 
 
