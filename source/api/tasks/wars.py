@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
@@ -131,7 +131,7 @@ async def request4():
 @tasks.loop(minutes=2)
 async def fetch_wars():
     time = datetime.utcnow()
-    data, data2, data3, data4 = await asyncio.gather(request(), request3())
+    data, data3 = await asyncio.gather(request(), request3())
     data = data["data"]["wars"]
     # data2 = data2["data"]["wars"]
     # data = [*data, *data2]
@@ -340,7 +340,7 @@ async def before_loop():
     now = datetime.utcnow()
     wait = now.replace(minute=0, second=8)
     while wait < now:
-        wait += datetime.timedelta(minutes=2)
+        wait += timedelta(minutes=2)
     await sleep_until(wait)
 
 
