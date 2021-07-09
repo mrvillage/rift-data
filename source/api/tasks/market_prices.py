@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
+
 import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
-from ...env import GQLURL, UPDATE_TIMES
+
 from ...data.db import execute_query_many, execute_read_query
+from ...env import GQLURL, UPDATE_TIMES
 from ...events import dispatch
 
 

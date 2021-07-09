@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta
 import re
+from datetime import datetime, timedelta
+
 import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
+
+from ...data.db import execute_query_many, execute_read_query
 from ...env import UPDATE_TIMES
-from ...data.db import execute_read_query, execute_query_many
 from ...events import dispatch
 
 

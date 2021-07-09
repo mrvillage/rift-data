@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
+
 import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
+
+from ...data.db import execute_query, execute_query_many, execute_read_query
 from ...env import GQLURL, UPDATE_TIMES
-from ...data.db import execute_query, execute_read_query, execute_query_many
 from ...events import dispatch
 
 
@@ -58,7 +60,10 @@ async def fetch_pending_trades():
                 continue
             if before != after:
                 await dispatch(
-                    "pending_trade_update", str(time), before=old[after[0]], after=raw_trades[after[0]]
+                    "pending_trade_update",
+                    str(time),
+                    before=old[after[0]],
+                    after=raw_trades[after[0]],
                 )
                 update[after[0]] = after
         for removed in old.values():
