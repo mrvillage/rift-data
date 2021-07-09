@@ -44,36 +44,47 @@ class UpdateTime:
 
     async def set_alliances(self, value: datetime):
         self.alliances = value
+        print("alliances", value)
 
     async def set_cities(self, value: datetime):
         self.cities = value
+        print("cities", value)
 
     async def set_colors(self, value: datetime):
         self.colors = value
+        print("colors", value)
 
     async def set_completed_trades(self, value: datetime):
         self.completed_trades = value
+        print("completed_trades", value)
 
     async def set_market_prices(self, value: datetime):
         self.market_prices = value
+        print("market_prices", value)
 
     async def set_nations(self, value: datetime):
         self.nations = value
+        print("nations", value)
 
     async def set_pending_trades(self, value: datetime):
         self.pending_trades = value
+        print("pending_trades", value)
 
     async def set_prices(self, value: datetime):
         self.prices = value
+        print("prices", value)
 
     async def set_treasures(self, value: datetime):
         self.treasures = value
+        print("treasures", value)
 
     async def set_treaties(self, value: datetime):
         self.treaties = value
+        print("treaties", value)
 
     async def set_wars(self, value: datetime):
         self.wars = value
+        print("wars", value)
 
 
 UPDATE_TIMES = UpdateTime()
