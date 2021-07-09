@@ -49,7 +49,7 @@ class UpdateTime:
         self.cities = value
 
     async def set_colors(self, value: datetime):
-        self.cities = value
+        self.colors = value
 
     async def set_completed_trades(self, value: datetime):
         self.completed_trades = value
