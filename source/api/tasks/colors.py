@@ -29,6 +29,7 @@ async def fetch_colors():
             )
             for i in data["data"]["colors"]
         }
+        raw_colors = {i["color"]: i for i in data["data"]["colors"]}
         old = await execute_read_query("SELECT * FROM colorsupdate;")
         old = [dict(i) for i in old]
         old = {i["color"]: i for i in old}
@@ -36,7 +37,12 @@ async def fetch_colors():
         for after in data.values():
             before = tuple(old[after[0]].values())
             if before != after:
-                await dispatch("color_update", str(time), before=before, after=after)
+                await dispatch(
+                    "color_update",
+                    str(time),
+                    before=old[after[0]],
+                    after=raw_colors[after[0]],
+                )
                 update[after[0]] = after
         await execute_query_many(
             """

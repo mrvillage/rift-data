@@ -41,12 +41,13 @@ async def fetch_trades():
             )
             for i in data["data"]["trades"]
         }
+        raw_trades = {int(i["id"]): i for i in data["data"]["trades"]}
         old = await execute_read_query("SELECT id FROM completed_tradesUPDATE;")
         old = [i["id"] for i in old]
         update = {}
         for trade in data.values():
             if trade[0] not in old:
-                await dispatch("trade_completed", str(time), trade=trade)
+                await dispatch("trade_completed", str(time), trade=raw_trades[trade[0]])
                 update[trade[0]] = trade
         await execute_query_many(
             """

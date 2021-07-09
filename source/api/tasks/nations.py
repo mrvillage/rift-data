@@ -59,6 +59,7 @@ async def fetch_nations():
         )
         for i in fetched_data
     }
+    raw_nations = {int(i["nation_id"]): i for i in fetched_data}
     old = await execute_read_query("SELECT * FROM nationsupdate;")
     old = [dict(i) for i in old]
     old = {i["id"]: i for i in old}
@@ -70,11 +71,16 @@ async def fetch_nations():
             before = tuple(old[after[0]].values())
             del old[after[0]]
         except KeyError:
-            await dispatch("nation_created", str(time), nation=after)
+            await dispatch("nation_created", str(time), nation=raw_nations[after[0]])
             update[after[0]] = after
             continue
         if before != after:
-            await dispatch("nation_update", str(time), before=before, after=after)
+            await dispatch(
+                "nation_update",
+                str(time),
+                before=old[after[0]],
+                after=raw_nations[after[0]],
+            )
             update[after[0]] = after
     for deleted in old.values():
         await dispatch("nation_deleted", str(time), nation=deleted)

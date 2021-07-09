@@ -41,6 +41,7 @@ async def fetch_pending_trades():
             )
             for i in data["data"]["trades"]
         }
+        raw_trades = {int(i["id"]): i for i in data["data"]["trades"]}
         old = await execute_read_query("SELECT * FROM pending_tradesUPDATE;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}
@@ -50,12 +51,14 @@ async def fetch_pending_trades():
                 before = tuple(old[after[0]].values())
                 del old[after[0]]
             except KeyError:
-                await dispatch("pending_trade_created", str(time), nation=after)
+                await dispatch(
+                    "pending_trade_created", str(time), trade=raw_trades[after[0]]
+                )
                 update[after[0]] = after
                 continue
             if before != after:
                 await dispatch(
-                    "pending_trade_update", str(time), before=before, after=after
+                    "pending_trade_update", str(time), before=old[after[0]], after=raw_trades[after[0]]
                 )
                 update[after[0]] = after
         for removed in old.values():

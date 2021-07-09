@@ -9,7 +9,7 @@ from ...events import dispatch
 
 query = """
     {
-        wars(active: true, days_ago: 6) {
+        wars(active: false, days_ago: 7) {
             id
             date
             reason
@@ -62,7 +62,7 @@ query = """
 """
 attack_query = """
     {
-        wars(active: true, days_ago: 6) {
+        wars(active: false, days_ago: 7) {
             id
             attacks {
                 id
@@ -131,19 +131,16 @@ async def request4():
 @tasks.loop(minutes=2)
 async def fetch_wars():
     time = datetime.utcnow()
-    data, data2, data3, data4 = await asyncio.gather(
-        request(), request2(), request3(), request4()
-    )
+    data, data2, data3, data4 = await asyncio.gather(request(), request3())
     data = data["data"]["wars"]
-    data2 = data2["data"]["wars"]
-    data = [*data, *data2]
+    # data2 = data2["data"]["wars"]
+    # data = [*data, *data2]
     data3 = data3["data"]["wars"]
-    data4 = data4["data"]["wars"]
-    data3 = [*data3, *data4]
-    wars = {}
+    # data4 = data4["data"]["wars"]
+    # data3 = [*data3, *data4]
     attacks = {}
-    for war in data:
-        wars[int(war["id"])] = (
+    wars = {
+        int(war["id"]): (
             int(war["id"]),
             war["date"],
             war["reason"],
@@ -193,6 +190,9 @@ async def fetch_wars():
             float(war["att_infra_destroyed_value"]),
             float(war["def_infra_destroyed_value"]),
         )
+        for war in data
+    }
+    raw_wars = {int(war["id"]): war for war in data}
     for war in data3:
         for attack in war["attacks"]:
             attacks[int(attack["id"])] = (
@@ -221,6 +221,9 @@ async def fetch_wars():
                 float(attack["att_gas_used"]),
                 float(attack["def_gas_used"]),
             )
+    raw_attacks = {
+        int(attack["id"]): attack for war in data3 for attack in war["attacks"]
+    }
     old_attacks = await execute_read_query("SELECT id FROM attacksUPDATE;")
     old_attacks = [i["id"] for i in old_attacks]
     attack_data = {}
@@ -230,17 +233,22 @@ async def fetch_wars():
     old_wars = {i["id"]: i for i in old_wars}
     for attack in attacks.values():
         if attack[0] not in old_attacks:
-            await dispatch("attack", str(time), attack=attack)
+            await dispatch("attack", str(time), attack=raw_attacks[attack[0]])
             attack_data[attack[0]] = attack
     for after in wars.values():
         try:
             before = tuple(old_wars[after[0]])
         except KeyError:
-            await dispatch("war_declaration", str(time), war=after)
+            await dispatch("war_declaration", str(time), war=raw_wars[after[0]])
             war_data[after[0]] = after
             continue
         if before != after:
-            await dispatch("war_update", str(time), before=before, after=after)
+            await dispatch(
+                "war_update",
+                str(time),
+                before=old_wars[after[0]],
+                after=raw_wars[after[0]],
+            )
             war_data[after[0]] = after
     await execute_query_many(
         """

@@ -26,12 +26,13 @@ async def fetch_alliances():
                 str([int(j) for j in i["heirids"]]) if "heirids" in i else None,
                 str([int(j) for j in i["leaderids"]]) if "leaderids" in i else None,
                 float(i["avgscore"]),
-                str(i["flagurl"]) if not i["flagurl"] == "" else None,
-                str(i["forumurl"]) if not i["forumurl"] == "" else None,
-                str(i["ircchan"]) if not i["ircchan"] == "" else None,
+                str(i["flagurl"]) if i["flagurl"] != "" else None,
+                str(i["forumurl"]) if i["forumurl"] != "" else None,
+                str(i["ircchan"]) if i["ircchan"] != "" else None,
             )
             for i in data["alliances"]
         }
+        raw_alliances = {int(i["id"]): i for i in data["alliances"]}
         old = await execute_read_query("SELECT * FROM alliancesupdate;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}
@@ -44,11 +45,18 @@ async def fetch_alliances():
                 before = tuple(old[after[0]].values())
                 del old[after[0]]
             except KeyError:
-                await dispatch("alliance_created", str(time), alliance=after)
+                await dispatch(
+                    "alliance_created", str(time), alliance=raw_alliances[after[0]]
+                )
                 update[after[0]] = after
                 continue
             if before != after:
-                await dispatch("alliance_update", str(time), before=before, after=after)
+                await dispatch(
+                    "alliance_update",
+                    str(time),
+                    before=old[after[0]],
+                    after=raw_alliances[after[0]],
+                )
                 update[after[0]] = after
         for deleted in old.values():
             await dispatch("alliance_deleted", str(time), alliance=deleted)

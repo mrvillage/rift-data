@@ -24,6 +24,7 @@ async def fetch_cities():
             )
             for i in data["all_cities"]
         }
+        raw_cities = {int(i["city_id"]): i for i in data["all_cities"]}
         old = await execute_read_query("SELECT * FROM citiesupdate;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}
@@ -37,11 +38,16 @@ async def fetch_cities():
                 before = tuple(old[after[0]].values())
                 del old[after[0]]
             except KeyError:
-                await dispatch("city_created", str(time), city=after)
+                await dispatch("city_created", str(time), city=raw_cities[after[0]])
                 update[after[0]] = after
                 continue
             if before != after:
-                await dispatch("city_update", str(time), before=before, after=after)
+                await dispatch(
+                    "city_update",
+                    str(time),
+                    before=old[after[0]],
+                    after=raw_cities[after[0]],
+                )
                 update[after[0]] = after
         for deleted in old.values():
             await dispatch("city_deleted", str(time), city=deleted)

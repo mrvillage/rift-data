@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from json import dumps
+from json import dumps, loads
 import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
@@ -40,7 +40,9 @@ async def fetch_treasures():
         )
         old = old[0]["treasures"]
         if old != treasures:
-            await dispatch("treasures_update", str(time), before=old, after=treasures)
+            await dispatch(
+                "treasures_update", str(time), before=loads(old), after=loads(treasures)
+            )
         await execute_query(
             """
             INSERT INTO treasuresUPDATE (datetime, treasures)
