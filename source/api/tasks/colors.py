@@ -64,8 +64,9 @@ async def before_loop():
     wait = now.replace(minute=1, second=0)
     while wait < now:
         wait += timedelta(minutes=30)
+    print("wait", "colors", wait)
     await sleep_until(wait)
 
 
-fetch_colors.add_exception_type(Exception)
+# fetch_colors.add_exception_type(Exception)
 fetch_colors.start()

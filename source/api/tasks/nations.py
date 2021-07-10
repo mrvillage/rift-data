@@ -133,8 +133,9 @@ async def before_loop():
     wait = now.replace(minute=0, second=0)
     while wait < now:
         wait += timedelta(minutes=4)
+    print("wait", "nations", wait)
     await sleep_until(wait)
 
 
-fetch_nations.add_exception_type(Exception)
+# fetch_nations.add_exception_type(Exception)
 fetch_nations.start()

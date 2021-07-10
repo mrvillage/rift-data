@@ -99,8 +99,9 @@ async def before_loop():
     wait = now.replace(minute=0, second=0)
     while wait < now:
         wait += timedelta(minutes=2)
+    print("wait", "alliances", wait)
     await sleep_until(wait)
 
 
-fetch_alliances.add_exception_type(Exception)
+# fetch_alliances.add_exception_type(Exception)
 fetch_alliances.start()

@@ -68,8 +68,9 @@ async def before_loop():
     wait = now.replace(minute=0, second=2)
     while wait < now:
         wait += timedelta(minutes=2)
+    print("wait", "completed_trades", wait)
     await sleep_until(wait)
 
 
-fetch_trades.add_exception_type(Exception)
+# fetch_trades.add_exception_type(Exception)
 fetch_trades.start()

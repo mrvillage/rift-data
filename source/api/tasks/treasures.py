@@ -62,8 +62,9 @@ async def before_loop():
     wait = now.replace(minute=2, second=6)
     while wait < now:
         wait += timedelta(hours=1)
+    print("wait", "treasures", wait)
     await sleep_until(wait)
 
 
-fetch_treasures.add_exception_type(Exception)
+# fetch_treasures.add_exception_type(Exception)
 fetch_treasures.start()

@@ -62,8 +62,9 @@ async def before_loop():
     wait = now.replace(second=0)
     while wait < now:
         wait += timedelta(seconds=30)
+    print("wait", "market_prices", wait)
     await sleep_until(wait)
 
 
-fetch_market_prices.add_exception_type(Exception)
+# fetch_market_prices.add_exception_type(Exception)
 fetch_market_prices.start()

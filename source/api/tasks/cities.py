@@ -80,8 +80,9 @@ async def before_loop():
     wait = now.replace(minute=0, second=0)
     while wait < now:
         wait += timedelta(minutes=2)
+    print("wait", "cities", wait)
     await sleep_until(wait)
 
 
-fetch_cities.add_exception_type(Exception)
+# fetch_cities.add_exception_type(Exception)
 fetch_cities.start()
