@@ -50,8 +50,10 @@ async def fetch_market_prices():
             lead, iron, bauxite, gasoline, munitions, steel, aluminum, food)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
         """,
-            str(time),
-            *list(data.values()),
+            (
+                str(time),
+                *list(data.values()),
+            ),
         )
         await UPDATE_TIMES.set_market_prices(time)
 
