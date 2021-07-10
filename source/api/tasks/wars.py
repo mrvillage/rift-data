@@ -257,6 +257,7 @@ async def fetch_wars():
             "defender_gas_used": attack[21],
             "aircraft_killed_by_tanks": attack[22],
         }
+        for attack in attacks.values()
     }
     old_attacks = await execute_read_query("SELECT id FROM attacksUPDATE;")
     old_attacks = [i["id"] for i in old_attacks]
