@@ -217,14 +217,15 @@ async def fetch_wars():
             float(attack["infra_destroyed"]),
             int(attack["improvements_destroyed"]),
             float(attack["money_looted"]),
-            attack["loot_info"],
-            int(attack["note"]) if attack["note"] is not None else 0,
+            attack["note"],
+            int(attack["note"]) if attack["note"].isdigit() else attack["note"],
             float(attack["city_infra_before"]),
             float(attack["infra_destroyed_value"]),
             float(attack["att_mun_used"]),
             float(attack["def_mun_used"]),
             float(attack["att_gas_used"]),
             float(attack["def_gas_used"]),
+            int(attack["aircraft_killed_by_tanks"]),
         )
         for attack in data3
     }
@@ -252,6 +253,7 @@ async def fetch_wars():
             "defender_munitions_used": attack[19],
             "attacker_gas_used": attack[20],
             "defender_gas_used": attack[21],
+            "aircraft_killed_by_tanks": attack[22],
         }
     }
     old_attacks = await execute_read_query("SELECT id FROM attacksUPDATE;")
@@ -356,8 +358,9 @@ async def fetch_wars():
         defcas1, attcas2, defcas2, city_id, infra_destroyed, improvements_lost,
         money_stolen, loot_info, resistance_eliminated, city_infra_before,
         infra_destroyed_value, attacker_munitions_used, defender_munitions_used,
-        attacker_gas_used, defender_gas_used) VALUES ($1, $2, $3, $4, $5, $6, $7,
-        $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+        attacker_gas_used, defender_gas_used, aircraft_killed_by_tanks) VALUES
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+        $17, $18, $19, $20, $21, $22, $23)
         ON CONFLICT (id) DO NOTHING;
     """,
         attack_data.values(),
