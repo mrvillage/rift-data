@@ -14,7 +14,7 @@ async def fetch_market_prices():
     time = datetime.utcnow()
     query = """
         {
-            tradeprices(limit=1) {
+            tradeprices(limit: 1) {
                 credit
                 coal
                 oil
