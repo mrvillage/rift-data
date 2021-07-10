@@ -39,17 +39,16 @@ async def fetch_cities():
             try:
                 before = tuple(old[after[0]].values())
                 del old[after[0]]
+                if before != after:
+                    await dispatch(
+                        "city_update",
+                        str(time),
+                        before=old[after[0]],
+                        after=raw_cities[after[0]],
+                    )
+                    update[after[0]] = after
             except KeyError:
                 await dispatch("city_created", str(time), city=raw_cities[after[0]])
-                update[after[0]] = after
-                continue
-            if before != after:
-                await dispatch(
-                    "city_update",
-                    str(time),
-                    before=old[after[0]],
-                    after=raw_cities[after[0]],
-                )
                 update[after[0]] = after
         for deleted in old.values():
             await dispatch("city_deleted", str(time), city=deleted)

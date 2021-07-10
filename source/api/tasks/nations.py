@@ -72,17 +72,16 @@ async def fetch_nations():
         try:
             before = tuple(old[after[0]].values())
             del old[after[0]]
+            if before != after:
+                await dispatch(
+                    "nation_update",
+                    str(time),
+                    before=old[after[0]],
+                    after=raw_nations[after[0]],
+                )
+                update[after[0]] = after
         except KeyError:
             await dispatch("nation_created", str(time), nation=raw_nations[after[0]])
-            update[after[0]] = after
-            continue
-        if before != after:
-            await dispatch(
-                "nation_update",
-                str(time),
-                before=old[after[0]],
-                after=raw_nations[after[0]],
-            )
             update[after[0]] = after
     for deleted in old.values():
         await dispatch("nation_deleted", str(time), nation=deleted)

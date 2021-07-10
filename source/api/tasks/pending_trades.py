@@ -52,18 +52,17 @@ async def fetch_pending_trades():
             try:
                 before = tuple(old[after[0]].values())
                 del old[after[0]]
+                if before != after:
+                    await dispatch(
+                        "pending_trade_update",
+                        str(time),
+                        before=old[after[0]],
+                        after=raw_trades[after[0]],
+                    )
+                    update[after[0]] = after
             except KeyError:
                 await dispatch(
                     "pending_trade_created", str(time), trade=raw_trades[after[0]]
-                )
-                update[after[0]] = after
-                continue
-            if before != after:
-                await dispatch(
-                    "pending_trade_update",
-                    str(time),
-                    before=old[after[0]],
-                    after=raw_trades[after[0]],
                 )
                 update[after[0]] = after
         for removed in old.values():
