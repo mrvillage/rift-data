@@ -6,7 +6,7 @@ from discord.ext import tasks
 from discord.utils import sleep_until
 
 from ...data.db import execute_query_many, execute_read_query
-from ...env import GQLURL, UPDATE_TIMES
+from ...env import APIKEY, GQLURL, UPDATE_TIMES
 from ...events import dispatch
 
 query = """
@@ -112,8 +112,11 @@ async def request2():
         return await response.json()
 
 
-async def request3():
-    async with aiohttp.request("GET", GQLURL, json={"query": attack_query}) as response:
+async def request3(min_war_attack_id):
+    async with aiohttp.request(
+        "GET",
+        f"https://politicsandwar.com/api/war-attacks/key={APIKEY}&min_war_attack_id={min_war_attack_id}",
+    ) as response:
         return await response.json()
 
 
@@ -132,15 +135,19 @@ async def request4():
 
 @tasks.loop(minutes=2)
 async def fetch_wars():
+    min_war_attack_id = (
+        await execute_read_query("SELECT min(id) FROM attacksUPDATE;")
+    )[0][0]
     time = datetime.utcnow()
-    data, data3 = await asyncio.gather(request(), request3())
+    data, data3 = await asyncio.gather(request(), request3(min_war_attack_id))
     data = data["data"]["wars"]
     # data2 = data2["data"]["wars"]
     # data = [*data, *data2]
-    data3 = data3["data"]["wars"]
+    data3 = data3["war_attacks"]
     # data4 = data4["data"]["wars"]
     # data3 = [*data3, *data4]
     attacks = {}
+    raw_wars = {int(war["id"]): war for war in data}
     wars = {
         int(war["id"]): (
             int(war["id"]),
@@ -194,37 +201,60 @@ async def fetch_wars():
         )
         for war in data
     }
-    raw_wars = {int(war["id"]): war for war in data}
-    for war in data3:
-        for attack in war["attacks"]:
-            attacks[int(attack["id"])] = (
-                int(attack["id"]),
-                int(war["id"]),
-                attack["date"],
-                attack["type"],
-                int(attack["victor"]),
-                int(attack["success"]),
-                int(attack["attcas1"]),
-                int(attack["defcas1"]),
-                int(attack["attcas2"]),
-                int(attack["defcas2"]),
-                int(attack["cityid"]),
-                float(attack["infradestroyed"]),
-                int(attack["improvementslost"]),
-                float(attack["moneystolen"]),
-                attack["loot_info"],
-                int(attack["resistance_eliminated"])
-                if attack["resistance_eliminated"] is not None
-                else 0,
-                float(attack["city_infra_before"]),
-                float(attack["infra_destroyed_value"]),
-                float(attack["att_mun_used"]),
-                float(attack["def_mun_used"]),
-                float(attack["att_gas_used"]),
-                float(attack["def_gas_used"]),
-            )
+    attacks = {
+        int(attack["id"]): (
+            int(attack["id"]),
+            int(attack["war_id"]),
+            attack["date"],
+            attack["type"],
+            int(attack["victor"]),
+            int(attack["success"]),
+            int(attack["attcas1"]),
+            int(attack["defcas1"]),
+            int(attack["attcas2"]),
+            int(attack["defcas2"]),
+            int(attack["cityid"]),
+            float(attack["infradestroyed"]),
+            int(attack["improvementslost"]),
+            float(attack["moneystolen"]),
+            attack["loot_info"],
+            int(attack["resistance_eliminated"])
+            if attack["resistance_eliminated"] is not None
+            else 0,
+            float(attack["city_infra_before"]),
+            float(attack["infra_destroyed_value"]),
+            float(attack["att_mun_used"]),
+            float(attack["def_mun_used"]),
+            float(attack["att_gas_used"]),
+            float(attack["def_gas_used"]),
+        )
+        for attack in data3
+    }
     raw_attacks = {
-        int(attack["id"]): attack for war in data3 for attack in war["attacks"]
+        attack[0]: {
+            "id": attack[0],
+            "war_id": attack[1],
+            "date": attack[2],
+            "type": attack[3],
+            "victor": attack[4],
+            "success": attack[5],
+            "attcas1": attack[6],
+            "defcas1": attack[7],
+            "attcas2": attack[8],
+            "defcas2": attack[9],
+            "city_id": attack[10],
+            "infra_destroyed": attack[11],
+            "improvements_lost": attack[12],
+            "money_stolen": attack[13],
+            "loot_info": attack[14],
+            "resistance_eliminated": attack[15],
+            "city_infra_before": attack[16],
+            "infra_destroyed_value": attack[17],
+            "attacker_munitions_used": attack[18],
+            "defender_munitions_used": attack[19],
+            "attacker_gas_used": attack[20],
+            "defender_gas_used": attack[21],
+        }
     }
     old_attacks = await execute_read_query("SELECT id FROM attacksUPDATE;")
     old_attacks = [i["id"] for i in old_attacks]
@@ -343,8 +373,9 @@ async def before_loop():
     wait = now.replace(minute=0, second=8)
     while wait < now:
         wait += timedelta(minutes=2)
+    print("wait", "wars", wait)
     await sleep_until(wait)
 
 
-fetch_wars.add_exception_type(Exception)
+# fetch_wars.add_exception_type(Exception)
 fetch_wars.start()
