@@ -202,24 +202,22 @@ async def fetch_wars():
     }
     attacks = {
         int(attack["id"]): (
-            int(attack["id"]),
+            int(attack["war_attack_id"]),
             int(attack["war_id"]),
             attack["date"],
-            attack["type"],
+            attack["attack_type"],
             int(attack["victor"]),
             int(attack["success"]),
             int(attack["attcas1"]),
             int(attack["defcas1"]),
             int(attack["attcas2"]),
             int(attack["defcas2"]),
-            int(attack["cityid"]),
-            float(attack["infradestroyed"]),
-            int(attack["improvementslost"]),
-            float(attack["moneystolen"]),
+            int(attack["city_id"]),
+            float(attack["infra_destroyed"]),
+            int(attack["improvements_destroyed"]),
+            float(attack["money_looted"]),
             attack["loot_info"],
-            int(attack["resistance_eliminated"])
-            if attack["resistance_eliminated"] is not None
-            else 0,
+            int(attack["note"]) if attack["note"] is not None else 0,
             float(attack["city_infra_before"]),
             float(attack["infra_destroyed_value"]),
             float(attack["att_mun_used"]),
