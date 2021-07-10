@@ -32,7 +32,7 @@ async def fetch_market_prices():
     """
     async with aiohttp.request("GET", GQLURL, json={"query": query}) as response:
         data = await response.json()
-        data = data["tradeprices"]
+        data = data["data"]["tradeprices"][0]
         old = await execute_read_query(
             """
             SELECT credit, coal, oil, uranium,
@@ -41,7 +41,7 @@ async def fetch_market_prices():
             ORDER BY datetime DESC LIMIT 1;
             """,
         )
-        old = dict(old)
+        old = dict(old[0])
         if old != data:
             await dispatch("market_prices_update", str(time), before=old, after=data)
         await execute_query_many(
@@ -62,8 +62,9 @@ async def before_loop():
     wait = now.replace(second=0)
     while wait < now:
         wait += timedelta(seconds=30)
+    print("wait", "market_prices", wait)
     await sleep_until(wait)
 
 
-fetch_market_prices.add_exception_type(Exception)
+# fetch_market_prices.add_exception_type(Exception)
 fetch_market_prices.start()
