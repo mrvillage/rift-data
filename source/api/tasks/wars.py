@@ -146,7 +146,6 @@ async def fetch_wars():
     data3 = data3["war_attacks"]
     # data4 = data4["data"]["wars"]
     # data3 = [*data3, *data4]
-    attacks = {}
     raw_wars = {int(war["id"]): war for war in data}
     wars = {
         int(war["id"]): (
