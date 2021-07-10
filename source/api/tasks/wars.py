@@ -225,7 +225,9 @@ async def fetch_wars():
             float(attack["def_mun_used"]),
             float(attack["att_gas_used"]),
             float(attack["def_gas_used"]),
-            int(attack["aircraft_killed_by_tanks"]),
+            int(attack["aircraft_killed_by_tanks"])
+            if attack["aircraft_killed_by_tanks"] is not None
+            else None,
         )
         for attack in data3
     }
