@@ -93,9 +93,9 @@ async def fetch_treaties():
 @fetch_treaties.before_loop
 async def before_loop():
     now = datetime.utcnow()
-    wait = now.replace(minute=5, second=0)
+    wait = now.replace(hour=7, minute=17, second=0)
     while wait < now:
-        wait += timedelta(minutes=5)
+        wait += timedelta(hours=12)
     await sleep_until(wait)
 
 
