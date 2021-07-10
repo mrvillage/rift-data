@@ -46,18 +46,17 @@ async def fetch_alliances():
             try:
                 before = tuple(old[after[0]].values())
                 del old[after[0]]
+                if before != after:
+                    await dispatch(
+                        "alliance_update",
+                        str(time),
+                        before=old[after[0]],
+                        after=raw_alliances[after[0]],
+                    )
+                    update[after[0]] = after
             except KeyError:
                 await dispatch(
                     "alliance_created", str(time), alliance=raw_alliances[after[0]]
-                )
-                update[after[0]] = after
-                continue
-            if before != after:
-                await dispatch(
-                    "alliance_update",
-                    str(time),
-                    before=old[after[0]],
-                    after=raw_alliances[after[0]],
                 )
                 update[after[0]] = after
         for deleted in old.values():
