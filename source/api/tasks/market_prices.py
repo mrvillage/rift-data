@@ -41,7 +41,7 @@ async def fetch_market_prices():
             ORDER BY datetime DESC LIMIT 1;
             """,
         )
-        old = dict(old)
+        old = dict(old[0])
         if old != data:
             await dispatch("market_prices_update", str(time), before=old, after=data)
         await execute_query_many(
