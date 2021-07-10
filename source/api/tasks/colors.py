@@ -51,7 +51,8 @@ async def fetch_colors():
             UPDATE colorsUPDATE SET
             color = $1,
             bloc_name = $2,
-            turn_bonus = $3;
+            turn_bonus = $3
+            WHERE color = $1;
         """,
             update.values(),
         )
