@@ -44,16 +44,14 @@ async def fetch_market_prices():
         old = dict(old[0])
         if old != data:
             await dispatch("market_prices_update", str(time), before=old, after=data)
+        data = [str(time), *list(data.values())]
         await execute_query_many(
             """
             INSERT INTO market_pricesUPDATE (datetime, credit, coal, oil, uranium,
             lead, iron, bauxite, gasoline, munitions, steel, aluminum, food)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
         """,
-            (
-                str(time),
-                *list(data.values()),
-            ),
+            data,
         )
         await UPDATE_TIMES.set_market_prices(time)
 
