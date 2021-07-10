@@ -201,7 +201,7 @@ async def fetch_wars():
         for war in data
     }
     attacks = {
-        int(attack["id"]): (
+        int(attack["war_attack_id"]): (
             int(attack["war_attack_id"]),
             int(attack["war_id"]),
             attack["date"],
