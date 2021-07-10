@@ -14,6 +14,7 @@ async def fetch_alliances():
     time = datetime.utcnow()
     async with aiohttp.request("GET", f"{BASEURL}/alliances/?key={APIKEY}") as response:
         data = await response.json()
+        raw_alliances = {int(i["id"]): i for i in data["alliances"]}
         data = {
             int(i["id"]): (
                 int(i["id"]),
@@ -34,7 +35,6 @@ async def fetch_alliances():
             )
             for i in data["alliances"]
         }
-        raw_alliances = {int(i["id"]): i for i in data["alliances"]}
         old = await execute_read_query("SELECT * FROM alliancesupdate;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}

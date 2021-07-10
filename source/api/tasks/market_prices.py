@@ -32,7 +32,7 @@ async def fetch_market_prices():
     """
     async with aiohttp.request("GET", GQLURL, json={"query": query}) as response:
         data = await response.json()
-        data = data["tradeprices"]
+        data = data["data"]["tradeprices"]
         old = await execute_read_query(
             """
             SELECT credit, coal, oil, uranium,

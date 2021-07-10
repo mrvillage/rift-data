@@ -141,6 +141,7 @@ async def fetch_wars():
     # data4 = data4["data"]["wars"]
     # data3 = [*data3, *data4]
     attacks = {}
+    raw_wars = {int(war["id"]): war for war in data}
     wars = {
         int(war["id"]): (
             int(war["id"]),
@@ -194,7 +195,9 @@ async def fetch_wars():
         )
         for war in data
     }
-    raw_wars = {int(war["id"]): war for war in data}
+    raw_attacks = {
+        int(attack["id"]): attack for war in data3 for attack in war["attacks"]
+    }
     for war in data3:
         for attack in war["attacks"]:
             attacks[int(attack["id"])] = (
@@ -223,9 +226,6 @@ async def fetch_wars():
                 float(attack["att_gas_used"]),
                 float(attack["def_gas_used"]),
             )
-    raw_attacks = {
-        int(attack["id"]): attack for war in data3 for attack in war["attacks"]
-    }
     old_attacks = await execute_read_query("SELECT id FROM attacksUPDATE;")
     old_attacks = [i["id"] for i in old_attacks]
     attack_data = {}
