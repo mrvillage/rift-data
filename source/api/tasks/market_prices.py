@@ -15,7 +15,7 @@ async def fetch_market_prices():
     query = """
         {
             tradeprices(limit: 1) {
-                credit
+                credits
                 coal
                 oil
                 uranium
