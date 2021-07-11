@@ -38,7 +38,6 @@ async def fetch_cities():
         for after in data.values():
             try:
                 before = tuple(old[after[0]].values())
-                del old[after[0]]
                 if before != after:
                     await dispatch(
                         "city_update",
@@ -47,6 +46,7 @@ async def fetch_cities():
                         after=raw_cities[after[0]],
                     )
                     update[after[0]] = after
+                del old[after[0]]
             except KeyError:
                 await dispatch("city_created", str(time), city=raw_cities[after[0]])
                 update[after[0]] = after

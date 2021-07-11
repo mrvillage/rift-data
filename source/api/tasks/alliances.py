@@ -45,7 +45,6 @@ async def fetch_alliances():
         for after in data.values():
             try:
                 before = tuple(old[after[0]].values())
-                del old[after[0]]
                 if before != after:
                     await dispatch(
                         "alliance_update",
@@ -54,6 +53,7 @@ async def fetch_alliances():
                         after=raw_alliances[after[0]],
                     )
                     update[after[0]] = after
+                del old[after[0]]
             except KeyError:
                 await dispatch(
                     "alliance_created", str(time), alliance=raw_alliances[after[0]]
