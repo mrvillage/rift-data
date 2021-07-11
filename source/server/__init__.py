@@ -68,9 +68,9 @@ class SocketServer:
         await self.runner.setup()
         self.site = web.TCPSite(
             self.runner,
-            "localhost",
+            "*",
             self.port,
-            ssl_context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH),
+            # ssl_context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH),
         )
         await self.site.start()
 
