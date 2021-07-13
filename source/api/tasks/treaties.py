@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, timedelta
+from asyncio import sleep
 
 import aiohttp
 from discord.ext import tasks
@@ -45,31 +46,25 @@ async def fetch_treaties():
     for alliance in alliances:
         result = await scrape_treaties(alliance)
         treaties = [*treaties, *result]
-    old_treaties = await execute_read_query(
-        "SELECT started, from_, to_, treaty_type FROM treatiesUPDATE WHERE stopped = $1;",
-        None,
-    )
-    old_treaties = [
-        (i["started"], i["from"], i["to"], i["treaty_type"]) for i in old_treaties
-    ]
-    short_old_treaties = [(i["from"], i["to"], i["treaty_type"]) for i in old_treaties]
+        await sleep(2)
+    old_treaties = await execute_read_query("SELECT * FROM treatiesUPDATE;")
+    old_treaties = [(i[0], i[2], i[3], i[4]) for i in old_treaties if i[1] is None]
+    short_old_treaties = [set(i[1:]) for i in old_treaties]
     purged_treaties = []
     short_purged_treaties = []
     for treaty in treaties:
-        if treaty[1:] not in short_purged_treaties:
+        if set(treaty[1:]) not in short_purged_treaties:
             purged_treaties.append(treaty)
-            short_purged_treaties.append(treaty[1:])
+            short_purged_treaties.append(set(treaty[1:]))
     new_treaties = []
     for treaty in purged_treaties:
-        if treaty[1:] not in short_old_treaties:
+        if set(treaty[1:]) not in short_old_treaties:
             treaty = (treaty[0], None, treaty[1], treaty[2], treaty[3])
             await dispatch("new_treaty", treaty[0], treaty=treaty)
             new_treaties.append(treaty)
-            continue
-    short_treaties = [i[1:] for i in new_treaties]
     expired_treaties = []
     for treaty in old_treaties:
-        if treaty[1:] not in short_treaties:
+        if set(treaty[1:]) not in short_purged_treaties:
             treaty = (treaty[0], str(time), treaty[1], treaty[2], treaty[3])
             await dispatch("treaty_expired", str(time), treaty=treaty)
             expired_treaties.append(treaty)
@@ -90,14 +85,14 @@ async def fetch_treaties():
     await UPDATE_TIMES.set_treaties(time)
 
 
-@fetch_treaties.before_loop
-async def before_loop():
-    now = datetime.utcnow()
-    wait = now.replace(hour=7, minute=17, second=0)
-    while wait < now:
-        wait += timedelta(hours=12)
-    await sleep_until(wait)
+# @fetch_treaties.before_loop
+# async def before_loop():
+#     now = datetime.utcnow()
+#     wait = now.replace(hour=7, minute=17, second=0)
+#     while wait < now:
+#         wait += timedelta(hours=12)
+#     await sleep_until(wait)
 
 
-fetch_treaties.add_exception_type(Exception)
+# fetch_treaties.add_exception_type(Exception)
 fetch_treaties.start()
