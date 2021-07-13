@@ -6,7 +6,7 @@ from . import (
     market_prices,
     nations,
     pending_trades,
-    # prices,
+    prices,
     treasures,
     treaties,
     wars,
