@@ -135,9 +135,7 @@ async def request4():
 
 @tasks.loop(minutes=2)
 async def fetch_wars():
-    min_war_attack_id = (
-        await execute_read_query("SELECT min(id) FROM attacksUPDATE;")
-    )[0][0]
+    min_war_attack_id = (await execute_read_query("SELECT min(id) FROM attacks;"))[0][0]
     time = datetime.utcnow()
     data, data3 = await asyncio.gather(request(), request3(min_war_attack_id))
     data = data["data"]["wars"]
