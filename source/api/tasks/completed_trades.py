@@ -44,7 +44,7 @@ async def fetch_trades():
             for i in data["data"]["trades"]
         }
         raw_trades = {int(i["id"]): i for i in data["data"]["trades"]}
-        old = await execute_read_query("SELECT id FROM completed_tradesUPDATE;")
+        old = await execute_read_query("SELECT id FROM completed_trades;")
         old = [i["id"] for i in old]
         update = {}
         for trade in data.values():
@@ -53,7 +53,7 @@ async def fetch_trades():
                 update[trade[0]] = trade
         await execute_query_many(
             """
-            INSERT INTO completed_tradesUPDATE (id, date, sender, receiver, offer_resource,
+            INSERT INTO completed_trades (id, date, sender, receiver, offer_resource,
             offer_amount, buy_or_sell, total, accepted) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             ON CONFLICT (id) DO NOTHING;
         """,

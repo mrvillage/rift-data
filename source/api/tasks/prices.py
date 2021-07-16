@@ -59,7 +59,7 @@ async def fetch_prices():
         """
         SELECT credit, coal, oil, uranium,
         lead, iron, bauxite, gasoline, munitions, steel,
-        aluminum, food FROM pricesUPDATE ORDER BY datetime DESC LIMIT 1;
+        aluminum, food FROM prices ORDER BY datetime DESC LIMIT 1;
         """,
     )
     old = tuple(old[0])
@@ -67,7 +67,7 @@ async def fetch_prices():
         await dispatch("prices_update", str(time), before=old, after=data)
     await execute_query(
         """
-        INSERT INTO pricesUPDATE (datetime, credit, coal, oil, uranium,
+        INSERT INTO prices (datetime, credit, coal, oil, uranium,
         lead, iron, bauxite, gasoline, munitions, steel, aluminum, food)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
         """,

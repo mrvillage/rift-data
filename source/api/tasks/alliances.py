@@ -61,12 +61,10 @@ async def fetch_alliances():
                 update[after[0]] = after
         for deleted in old.values():
             await dispatch("alliance_deleted", str(time), alliance=deleted)
-            await execute_query(
-                "DELETE FROM alliancesUPDATE WHERE id = $1;", deleted["id"]
-            )
+            await execute_query("DELETE FROM alliances WHERE id = $1;", deleted["id"])
         await execute_query_many(
             """
-            INSERT INTO alliancesUPDATE (id, found_date, name, acronym, color, rank,
+            INSERT INTO alliances (id, found_date, name, acronym, color, rank,
             members, score, officer_ids, heir_ids, leader_ids, avg_score,
             flag_url, forum_url, ircchan) VALUES ($1, $2, $3, $4, $5, $6, $7,
             $8, $9, $10, $11, $12, $13, $14, $15)

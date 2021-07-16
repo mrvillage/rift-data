@@ -36,7 +36,7 @@ async def fetch_treasures():
         treasures = dumps(treasures)
         old = await execute_read_query(
             """
-            SELECT treasures FROM treasuresUPDATE
+            SELECT treasures FROM treasures
             ORDER BY datetime DESC LIMIT 1;
             """,
         )
@@ -47,7 +47,7 @@ async def fetch_treasures():
             )
         await execute_query(
             """
-            INSERT INTO treasuresUPDATE (datetime, treasures)
+            INSERT INTO treasures (datetime, treasures)
             VALUES ($1, $2);
             """,
             str(time),

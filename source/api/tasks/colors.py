@@ -32,7 +32,7 @@ async def fetch_colors():
             for i in data["data"]["colors"]
         }
         raw_colors = {i["color"]: i for i in data["data"]["colors"]}
-        old = await execute_read_query("SELECT * FROM colorsupdate;")
+        old = await execute_read_query("SELECT * FROM colors;")
         old = [dict(i) for i in old]
         old = {i["color"]: i for i in old}
         update = {}
@@ -48,7 +48,7 @@ async def fetch_colors():
                 update[after[0]] = after
         await execute_query_many(
             """
-            UPDATE colorsUPDATE SET
+            UPDATE colors SET
             color = $1,
             bloc_name = $2,
             turn_bonus = $3

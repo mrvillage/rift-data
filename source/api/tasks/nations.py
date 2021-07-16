@@ -62,7 +62,7 @@ async def fetch_nations():
         for i in fetched_data
     }
     raw_nations = {int(i["nation_id"]): i for i in fetched_data}
-    old = await execute_read_query("SELECT * FROM nationsupdate;")
+    old = await execute_read_query("SELECT * FROM nations;")
     old = [dict(i) for i in old]
     old = {i["id"]: i for i in old}
     update = {}
@@ -85,10 +85,10 @@ async def fetch_nations():
             update[after[0]] = after
     for deleted in old.values():
         await dispatch("nation_deleted", str(time), nation=deleted)
-        await execute_query("DELETE FROM nationsUPDATE WHERE id = $1;", deleted["id"])
+        await execute_query("DELETE FROM nations WHERE id = $1;", deleted["id"])
     await execute_query_many(
         """
-        INSERT INTO nationsUPDATE (id, name, leader, continent, war_policy,
+        INSERT INTO nations (id, name, leader, continent, war_policy,
         domestic_policy, color, alliance_id, alliance, alliance_position, cities,
         offensive_wars, defensive_wars, score, v_mode, v_mode_turns, beige_turns,
         last_active, founded, soldiers, tanks, aircraft, ships, missiles, nukes)

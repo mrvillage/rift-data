@@ -44,7 +44,7 @@ async def fetch_pending_trades():
             for i in data["data"]["trades"]
         }
         raw_trades = {int(i["id"]): i for i in data["data"]["trades"]}
-        old = await execute_read_query("SELECT * FROM pending_tradesUPDATE;")
+        old = await execute_read_query("SELECT * FROM pending_trades;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}
         update = {}
@@ -68,11 +68,11 @@ async def fetch_pending_trades():
         for removed in old.values():
             await dispatch("pending_trade_removed", str(time), trade=removed)
             await execute_query(
-                "DELETE FROM pending_tradesUPDATE WHERE id = $1;", removed["id"]
+                "DELETE FROM pending_trades WHERE id = $1;", removed["id"]
             )
         await execute_query_many(
             """
-            INSERT INTO pending_tradesUPDATE (id, date, sender, receiver, offer_resource,
+            INSERT INTO pending_trades (id, date, sender, receiver, offer_resource,
             offer_amount, buy_or_sell, total, accepted) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             ON CONFLICT (id) DO UPDATE SET
             id = $1,

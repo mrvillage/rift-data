@@ -39,7 +39,7 @@ async def scrape_treaty_web():
 async def fetch_treaties():
     time = datetime.utcnow()
     alliances = await execute_read_query(
-        "SELECT id FROM alliancesUPDATE WHERE rank <= 250 AND rank > 50;"
+        "SELECT id FROM alliances WHERE rank <= 250 AND rank > 50;"
     )
     alliances = [i["id"] for i in alliances]
     treaties = [*(await scrape_treaty_web())]
@@ -47,7 +47,7 @@ async def fetch_treaties():
         result = await scrape_treaties(alliance)
         treaties = [*treaties, *result]
         await sleep(2)
-    old_treaties = await execute_read_query("SELECT * FROM treatiesUPDATE;")
+    old_treaties = await execute_read_query("SELECT * FROM treaties;")
     old_treaties = [(i[0], i[2], i[3], i[4]) for i in old_treaties if i[1] is None]
     short_old_treaties = [set(i[1:]) for i in old_treaties]
     purged_treaties = []
@@ -70,14 +70,14 @@ async def fetch_treaties():
             expired_treaties.append(treaty)
     await execute_query_many(
         """
-        INSERT INTO treatiesUPDATE (started, stopped, from_, to_,
+        INSERT INTO treaties (started, stopped, from_, to_,
         treaty_type) VALUES ($1, $2, $3, $4, $5);
     """,
         new_treaties,
     )
     await execute_query_many(
         """
-        UPDATE treatiesUPDATE SET stopped = $2 WHERE started = $1
+        UPDATE treaties SET stopped = $2 WHERE started = $1
         AND from_ = $3 AND to_ = $4 AND treaty_type = $5;
     """,
         expired_treaties,
@@ -85,14 +85,14 @@ async def fetch_treaties():
     await UPDATE_TIMES.set_treaties(time)
 
 
-# @fetch_treaties.before_loop
-# async def before_loop():
-#     now = datetime.utcnow()
-#     wait = now.replace(hour=7, minute=17, second=0)
-#     while wait < now:
-#         wait += timedelta(hours=12)
-#     await sleep_until(wait)
+@fetch_treaties.before_loop
+async def before_loop():
+    now = datetime.utcnow()
+    wait = now.replace(hour=7, minute=17, second=0)
+    while wait < now:
+        wait += timedelta(hours=12)
+    await sleep_until(wait)
 
 
-# fetch_treaties.add_exception_type(Exception)
+fetch_treaties.add_exception_type(Exception)
 fetch_treaties.start()

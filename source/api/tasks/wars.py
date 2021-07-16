@@ -258,11 +258,11 @@ async def fetch_wars():
         }
         for attack in attacks.values()
     }
-    old_attacks = await execute_read_query("SELECT id FROM attacksUPDATE;")
+    old_attacks = await execute_read_query("SELECT id FROM attacks;")
     old_attacks = [i["id"] for i in old_attacks]
     attack_data = {}
     war_data = {}
-    old_wars = await execute_read_query("SELECT * FROM warsupdate;")
+    old_wars = await execute_read_query("SELECT * FROM wars;")
     old_wars = [dict(i) for i in old_wars]
     old_wars = {i["id"]: i for i in old_wars}
     for attack in attacks.values():
@@ -286,7 +286,7 @@ async def fetch_wars():
             war_data[after[0]] = after
     await execute_query_many(
         """
-        INSERT INTO warsUPDATE (id, date, reason, war_type, active, ground_control,
+        INSERT INTO wars (id, date, reason, war_type, active, ground_control,
         air_superiority, naval_blockade, winner, turns_left, attacker_id,
         attacker_alliance_id, defender_id, defender_alliance_id, attacker_points,
         defender_points, attacker_peace, defender_peace, attacker_resistance,
@@ -356,7 +356,7 @@ async def fetch_wars():
     )
     await execute_query_many(
         """
-        INSERT INTO attacksUPDATE (id, war_id, date, type, victor, success, attcas1,
+        INSERT INTO attacks (id, war_id, date, type, victor, success, attcas1,
         defcas1, attcas2, defcas2, city_id, infra_destroyed, improvements_lost,
         money_stolen, loot_info, resistance_eliminated, city_infra_before,
         infra_destroyed_value, attacker_munitions_used, defender_munitions_used,

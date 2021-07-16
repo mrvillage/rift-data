@@ -52,12 +52,10 @@ async def fetch_cities():
                 update[after[0]] = after
         for deleted in old.values():
             await dispatch("city_deleted", str(time), city=deleted)
-            await execute_query(
-                "DELETE FROM citiesUPDATE WHERE id = $1;", deleted["id"]
-            )
+            await execute_query("DELETE FROM cities WHERE id = $1;", deleted["id"])
         await execute_query_many(
             """
-            INSERT INTO citiesUPDATE (id, nation_id, name, capital,
+            INSERT INTO cities (id, nation_id, name, capital,
             infrastructure, max_infra, land) VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (id) DO UPDATE SET
             id = $1,
