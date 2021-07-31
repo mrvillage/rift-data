@@ -41,7 +41,7 @@ async def fetch_alliances():
         update = {}
         for i in old.values():
             i["score"] = round(i["score"], 2)
-            i["avgscore"] = round(i["avgscore"], 4)
+            i["avg_score"] = round(i["avg_score"], 4)
         for after in data.values():
             try:
                 before = tuple(old[after[0]].values())
