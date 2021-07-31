@@ -27,7 +27,7 @@ async def fetch_cities():
             for i in data["all_cities"]
         }
         raw_cities = {int(i["city_id"]): i for i in data["all_cities"]}
-        old = await execute_read_query("SELECT * FROM citiesupdate;")
+        old = await execute_read_query("SELECT * FROM cities;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}
         update = {}
