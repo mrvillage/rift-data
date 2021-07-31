@@ -35,7 +35,7 @@ async def fetch_alliances():
             )
             for i in data["alliances"]
         }
-        old = await execute_read_query("SELECT * FROM alliancesupdate;")
+        old = await execute_read_query("SELECT * FROM alliances;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}
         update = {}
@@ -99,5 +99,5 @@ async def before_loop():
     await sleep_until(wait)
 
 
-#fetch_alliances.add_exception_type(Exception)
+# fetch_alliances.add_exception_type(Exception)
 fetch_alliances.start()
