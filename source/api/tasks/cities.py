@@ -14,6 +14,7 @@ async def fetch_cities():
     time = datetime.utcnow()
     async with aiohttp.request("GET", f"{BASEURL}/all-cities/key={APIKEY}") as response:
         data = await response.json()
+        raw_cities = {int(i["city_id"]): i for i in data["all_cities"]}
         data = {
             int(i["city_id"]): (
                 int(i["city_id"]),
@@ -26,7 +27,6 @@ async def fetch_cities():
             )
             for i in data["all_cities"]
         }
-        raw_cities = {int(i["city_id"]): i for i in data["all_cities"]}
         old = await execute_read_query("SELECT * FROM cities;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}
@@ -80,5 +80,5 @@ async def before_loop():
     await sleep_until(wait)
 
 
-fetch_cities.add_exception_type(Exception)
+# fetch_cities.add_exception_type(Exception)
 fetch_cities.start()

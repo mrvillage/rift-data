@@ -31,6 +31,7 @@ async def fetch_nations():
     time = datetime.utcnow()
     responses = await asyncio.gather(city_one(), city_two())
     fetched_data = [*responses[0], *responses[1]]
+    raw_nations = {int(i["nation_id"]): i for i in fetched_data}
     data = {
         int(i["nation_id"]): (
             int(i["nation_id"]),
@@ -61,7 +62,6 @@ async def fetch_nations():
         )
         for i in fetched_data
     }
-    raw_nations = {int(i["nation_id"]): i for i in fetched_data}
     old = await execute_read_query("SELECT * FROM nations;")
     old = [dict(i) for i in old]
     old = {i["id"]: i for i in old}

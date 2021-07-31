@@ -23,6 +23,7 @@ async def fetch_colors():
     """
     async with aiohttp.request("GET", GQLURL, json={"query": query}) as response:
         data = await response.json()
+        raw_colors = {i["color"]: i for i in data["data"]["colors"]}
         data = {
             i["color"]: (
                 i["color"],
@@ -31,7 +32,6 @@ async def fetch_colors():
             )
             for i in data["data"]["colors"]
         }
-        raw_colors = {i["color"]: i for i in data["data"]["colors"]}
         old = await execute_read_query("SELECT * FROM colors;")
         old = [dict(i) for i in old]
         old = {i["color"]: i for i in old}
@@ -68,5 +68,5 @@ async def before_loop():
     await sleep_until(wait)
 
 
-fetch_colors.add_exception_type(Exception)
+# fetch_colors.add_exception_type(Exception)
 fetch_colors.start()

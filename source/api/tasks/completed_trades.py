@@ -29,6 +29,7 @@ async def fetch_trades():
     """
     async with aiohttp.request("GET", GQLURL, json={"query": query}) as response:
         data = await response.json()
+        raw_trades = {int(i["id"]): i for i in data["data"]["trades"]}
         data = {
             int(i["id"]): (
                 int(i["id"]),
@@ -43,7 +44,6 @@ async def fetch_trades():
             )
             for i in data["data"]["trades"]
         }
-        raw_trades = {int(i["id"]): i for i in data["data"]["trades"]}
         old = await execute_read_query("SELECT id FROM completed_trades;")
         old = [i["id"] for i in old]
         update = {}
