@@ -1,7 +1,7 @@
 from . import (
     alliances,
     cities,
-    #    colors,
+    colors,
     #    completed_trades,
     #    market_prices,
     nations,
