@@ -68,5 +68,5 @@ async def before_loop():
     await sleep_until(wait)
 
 
-# fetch_colors.add_exception_type(Exception)
+fetch_colors.add_exception_type(Exception)
 fetch_colors.start()

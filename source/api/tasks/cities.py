@@ -80,5 +80,5 @@ async def before_loop():
     await sleep_until(wait)
 
 
-# fetch_cities.add_exception_type(Exception)
+fetch_cities.add_exception_type(Exception)
 fetch_cities.start()

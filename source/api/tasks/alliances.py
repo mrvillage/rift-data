@@ -99,5 +99,5 @@ async def before_loop():
     await sleep_until(wait)
 
 
-# fetch_alliances.add_exception_type(Exception)
+fetch_alliances.add_exception_type(Exception)
 fetch_alliances.start()
