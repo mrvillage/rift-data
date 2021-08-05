@@ -7,7 +7,7 @@ from . import (
     nations,
     #    pending_trades,
     prices,
-    #    treasures,
+    treasures,
     treaties,
     #    wars,
 )
