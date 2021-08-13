@@ -9,5 +9,5 @@ from . import (
     prices,
     treasures,
     treaties,
-    #    wars,
+    wars,
 )
