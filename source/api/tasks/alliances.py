@@ -40,7 +40,7 @@ async def fetch_alliances():
         old = {i["id"]: i for i in old}
         update = {}
         for i in old.values():
-            i["score"] = round(i["score"], 2)
+            i["score"] = round(i["score"], 2) if i["score"] is not None else None
             i["avg_score"] = round(i["avg_score"], 4)
         for after in data.values():
             try:
