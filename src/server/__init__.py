@@ -1,6 +1,9 @@
 import asyncio
 import ssl
+import sys
+import traceback
 from typing import TYPE_CHECKING, Any
+
 from aiohttp import web
 from aiohttp.http_websocket import WSMsgType
 from aiohttp.web_request import BaseRequest
@@ -68,6 +71,10 @@ class SocketServer:
                 for sock in self.sockets:
                     if sock["socket"] is websocket:
                         self.sockets.remove(sock)
+                print("Ignoring exception in prices:", file=sys.stderr)
+                traceback.print_exception(
+                    type(error), error, error.__traceback__, file=sys.stderr
+                )
                 return
 
     async def start_coro(self) -> None:
