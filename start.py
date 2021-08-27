@@ -1,6 +1,6 @@
 import asyncio
-from source.env import SERVER
-import source.api  # pylint: disable=unused-import
+from src.env import SERVER
+import src.api  # pylint: disable=unused-import
 
 loop = asyncio.get_event_loop()
 SERVER.start()
