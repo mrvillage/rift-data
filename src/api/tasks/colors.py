@@ -1,3 +1,5 @@
+import sys
+import traceback
 from datetime import datetime, timedelta
 
 import aiohttp
@@ -5,58 +7,64 @@ from discord.ext import tasks
 from discord.utils import sleep_until
 
 from ...data.db import execute_query_many, execute_read_query
-from ...env import GQLURL, UPDATE_TIMES
+from ...env import GQL_URL, UPDATE_TIMES
 from ...events import dispatch
 
 
 @tasks.loop(minutes=30)
 async def fetch_colors():
-    time = datetime.utcnow()
-    query = """
-        {
-            colors {
-                color
-                bloc_name
-                turn_bonus
+    try:
+        time = datetime.utcnow()
+        query = """
+            {
+                colors {
+                    color
+                    bloc_name
+                    turn_bonus
+                }
             }
-        }
-    """
-    async with aiohttp.request("GET", GQLURL, json={"query": query}) as response:
-        data = await response.json()
-        raw_colors = {i["color"]: i for i in data["data"]["colors"]}
-        data = {
-            i["color"]: (
-                i["color"],
-                i["bloc_name"],
-                int(i["turn_bonus"]),
-            )
-            for i in data["data"]["colors"]
-        }
-        old = await execute_read_query("SELECT * FROM colors;")
-        old = [dict(i) for i in old]
-        old = {i["color"]: i for i in old}
-        update = {}
-        for after in data.values():
-            before = tuple(old[after[0]].values())
-            if before != after:
-                await dispatch(
-                    "color_update",
-                    str(time),
-                    before=old[after[0]],
-                    after=raw_colors[after[0]],
+        """
+        async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
+            data = await response.json()
+            raw_colors = {i["color"]: i for i in data["data"]["colors"]}
+            data = {
+                i["color"]: (
+                    i["color"],
+                    i["bloc_name"],
+                    int(i["turn_bonus"]),
                 )
-                update[after[0]] = after
-        await execute_query_many(
-            """
-            UPDATE colors SET
-            color = $1,
-            bloc_name = $2,
-            turn_bonus = $3
-            WHERE color = $1;
-        """,
-            update.values(),
+                for i in data["data"]["colors"]
+            }
+            old = await execute_read_query("SELECT * FROM colors;")
+            old = [dict(i) for i in old]
+            old = {i["color"]: i for i in old}
+            update = {}
+            for after in data.values():
+                before = tuple(old[after[0]].values())
+                if before != after:
+                    await dispatch(
+                        "color_update",
+                        str(time),
+                        before=old[after[0]],
+                        after=raw_colors[after[0]],
+                    )
+                    update[after[0]] = after
+            await execute_query_many(
+                """
+                UPDATE colors SET
+                color = $1,
+                bloc_name = $2,
+                turn_bonus = $3
+                WHERE color = $1;
+            """,
+                update.values(),
+            )
+            await UPDATE_TIMES.set_colors(time)
+    except Exception as error:
+        print("Ignoring exception in colors:", file=sys.stderr)
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr
         )
-        await UPDATE_TIMES.set_colors(time)
 
 
 @fetch_colors.before_loop

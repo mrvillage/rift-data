@@ -1,6 +1,8 @@
 import re
-from datetime import datetime, timedelta
+import sys
+import traceback
 from asyncio import sleep
+from datetime import datetime, timedelta
 
 import aiohttp
 from discord.ext import tasks
@@ -37,52 +39,58 @@ async def scrape_treaty_web():
 
 @tasks.loop(hours=12)
 async def fetch_treaties():
-    time = datetime.utcnow()
-    alliances = await execute_read_query(
-        "SELECT id FROM alliances WHERE rank <= 250 AND rank > 50;"
-    )
-    alliances = [i["id"] for i in alliances]
-    treaties = [*(await scrape_treaty_web())]
-    for alliance in alliances:
-        result = await scrape_treaties(alliance)
-        treaties = [*treaties, *result]
-        await sleep(2)
-    old_treaties = await execute_read_query("SELECT * FROM treaties;")
-    old_treaties = [(i[0], i[2], i[3], i[4]) for i in old_treaties if i[1] is None]
-    short_old_treaties = [set(i[1:]) for i in old_treaties]
-    purged_treaties = []
-    short_purged_treaties = []
-    for treaty in treaties:
-        if set(treaty[1:]) not in short_purged_treaties:
-            purged_treaties.append(treaty)
-            short_purged_treaties.append(set(treaty[1:]))
-    new_treaties = []
-    for treaty in purged_treaties:
-        if set(treaty[1:]) not in short_old_treaties:
-            treaty = (treaty[0], None, treaty[1], treaty[2], treaty[3])
-            await dispatch("new_treaty", treaty[0], treaty=treaty)
-            new_treaties.append(treaty)
-    expired_treaties = []
-    for treaty in old_treaties:
-        if set(treaty[1:]) not in short_purged_treaties:
-            treaty = (treaty[0], str(time), treaty[1], treaty[2], treaty[3])
-            await dispatch("treaty_expired", str(time), treaty=treaty)
-            expired_treaties.append(treaty)
-    await execute_query_many(
-        """
-        INSERT INTO treaties (started, stopped, from_, to_,
-        treaty_type) VALUES ($1, $2, $3, $4, $5);
-    """,
-        new_treaties,
-    )
-    await execute_query_many(
-        """
-        UPDATE treaties SET stopped = $2 WHERE started = $1
-        AND from_ = $3 AND to_ = $4 AND treaty_type = $5;
-    """,
-        expired_treaties,
-    )
-    await UPDATE_TIMES.set_treaties(time)
+    try:
+        time = datetime.utcnow()
+        alliances = await execute_read_query(
+            "SELECT id FROM alliances WHERE rank <= 250 AND rank > 50;"
+        )
+        alliances = [i["id"] for i in alliances]
+        treaties = [*(await scrape_treaty_web())]
+        for alliance in alliances:
+            result = await scrape_treaties(alliance)
+            treaties = [*treaties, *result]
+            await sleep(2)
+        old_treaties = await execute_read_query("SELECT * FROM treaties;")
+        old_treaties = [(i[0], i[2], i[3], i[4]) for i in old_treaties if i[1] is None]
+        short_old_treaties = [set(i[1:]) for i in old_treaties]
+        purged_treaties = []
+        short_purged_treaties = []
+        for treaty in treaties:
+            if set(treaty[1:]) not in short_purged_treaties:
+                purged_treaties.append(treaty)
+                short_purged_treaties.append(set(treaty[1:]))
+        new_treaties = []
+        for treaty in purged_treaties:
+            if set(treaty[1:]) not in short_old_treaties:
+                treaty = (treaty[0], None, treaty[1], treaty[2], treaty[3])
+                await dispatch("new_treaty", treaty[0], treaty=treaty)
+                new_treaties.append(treaty)
+        expired_treaties = []
+        for treaty in old_treaties:
+            if set(treaty[1:]) not in short_purged_treaties:
+                treaty = (treaty[0], str(time), treaty[1], treaty[2], treaty[3])
+                await dispatch("treaty_expired", str(time), treaty=treaty)
+                expired_treaties.append(treaty)
+        await execute_query_many(
+            """
+            INSERT INTO treaties (started, stopped, from_, to_,
+            treaty_type) VALUES ($1, $2, $3, $4, $5);
+        """,
+            new_treaties,
+        )
+        await execute_query_many(
+            """
+            UPDATE treaties SET stopped = $2 WHERE started = $1
+            AND from_ = $3 AND to_ = $4 AND treaty_type = $5;
+        """,
+            expired_treaties,
+        )
+        await UPDATE_TIMES.set_treaties(time)
+    except Exception as error:
+        print("Ignoring exception in treaties:", file=sys.stderr)
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr
+        )
 
 
 @fetch_treaties.before_loop

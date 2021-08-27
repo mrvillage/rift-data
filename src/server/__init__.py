@@ -1,7 +1,9 @@
 import asyncio
 import ssl
+from typing import TYPE_CHECKING, Any
 from aiohttp import web
 from aiohttp.http_websocket import WSMsgType
+from aiohttp.web_request import BaseRequest
 
 
 class SocketServer:
@@ -27,25 +29,25 @@ class SocketServer:
 
         return decorator
 
-    async def socket_handler(self, request):
+    async def socket_handler(self, req: BaseRequest) -> None:
         websocket = web.WebSocketResponse()
-        await websocket.prepare(request)
+        await websocket.prepare(req)
         self.sockets.append(
             {
                 "socket": websocket,
             }
         )
         async for message in websocket:
-            request: dict = message.json()
-            endpoint = request.get("endpoint")
-            code = request.get("code")
-            if not code or code != self.auth_code:
-                response = {
-                    "success": False,
-                    "error": "Invalid token.",
-                }
-            else:
-                if not endpoint or endpoint not in self.endpoints:
+            try:
+                request: dict = message.json()
+                endpoint = request.get("endpoint")
+                code = request.get("code")
+                if not code or code != self.auth_code:
+                    response = {
+                        "success": False,
+                        "error": "Invalid token.",
+                    }
+                elif not endpoint or endpoint not in self.endpoints:
                     response = {"success": False, "error": "Invalid endpoint."}
                 else:
                     args = request.get("args", [])
@@ -55,15 +57,22 @@ class SocketServer:
                             "success": True,
                             "data": await self.endpoints[endpoint](*args, *kwargs),
                         }
-                    except Exception as error:  # pylint: disable=broad-except
+                    except Exception as error:
                         response = {"success": False, "error": str(error)}
-            try:
-                await websocket.send_json(response)
-            except Exception as error:  # pylint: disable=broad-except
-                response = {"success": False, "error": str(error)}
-                await websocket.send_json(response)
+                try:
+                    await websocket.send_json(response)
+                except Exception as error:
+                    response = {"success": False, "error": str(error)}
+                    await websocket.send_json(response)
+            except Exception as error:
+                for sock in self.sockets:
+                    if sock["socket"] is websocket:
+                        self.sockets.remove(sock)
+                return
 
-    async def start_coro(self):
+    async def start_coro(self) -> None:
+        if TYPE_CHECKING:
+            assert self.server is not None
         self.runner = web.AppRunner(self.server)
         await self.runner.setup()
         self.site = web.TCPSite(
@@ -74,11 +83,11 @@ class SocketServer:
         )
         await self.site.start()
 
-    def start(self):
+    def start(self) -> None:
         self.server = web.Application()
-        self.server.router.add_route("GET", "/", self.socket_handler)
+        self.server.router.add_route("GET", "/", self.socket_handler)  # type: ignore
         self.loop.create_task(self.start_coro())
 
-    async def send_all(self, data):
+    async def send_all(self, data: dict[str, Any]) -> None:
         coros = [socket["socket"].send_json(data) for socket in self.sockets]
         await asyncio.gather(*coros)
