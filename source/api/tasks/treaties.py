@@ -25,7 +25,7 @@ async def scrape_treaties(alliance_id):
 
 async def scrape_treaty_web():
     async with aiohttp.request(
-        "GET", "https://politicsandwar.com/alliances/treatyweb/"
+        "GET", "https://politicsandwar.com/alliances/treatyweb/all"
     ) as response:
         text = await response.text()
         matches = re.findall(
