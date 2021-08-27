@@ -11,10 +11,3 @@ loop.run_forever()
 # CACHING OF MASSIVE AMOUNTS OF DATA EVERY FEW MINUTES, BUT INSTEAD ARE ONLY RETRIEVING THE
 # DATA THAT IS ACTUALLY REQUIRED FOR MY SERVICE (WHICH WILL MOST LIKELY BE EVERYTHING IN ALL
 # HONESTY, SINCE THEN I CAN PROVIDE FREQUENTLY UPDATED STATS AND WHATNOT)
-
-# Data Dumps
-# 1. Request the file from the URL
-# 2. Use io.BytesIO to make a file-like object from the bytes content of the response
-# 3. Put the file-like object into zipfile.ZipFile()
-# 4. Read the file name using zipfile.ZipFile().read()
-# 5. Parse the return text as a CSV!
