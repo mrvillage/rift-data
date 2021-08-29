@@ -7,7 +7,7 @@ from discord.ext import tasks
 from discord.utils import sleep_until
 
 
-@tasks.loop(minutes=15)
+@tasks.loop(minutes=2)
 async def api_keep_alive():
     try:
         async with aiohttp.request(
