@@ -27,14 +27,7 @@ async def fetch_colors():
         """
         async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
             data = await response.json()
-            colors = {
-                i["color"]: (
-                    i["color"],
-                    i["bloc_name"],
-                    int(i["turn_bonus"]),
-                )
-                for i in data["data"]["colors"]
-            }
+            colors = data["data"]["colors"]
             old = await execute_read_query(
                 "SELECT colors FROM colors ORDER BY datetime DESC LIMIT 1;"
             )
@@ -68,7 +61,7 @@ async def before_loop():
     wait = now.replace(minute=1, second=0)
     while wait < now:
         wait += timedelta(minutes=30)
-    await sleep_until(wait)
+    # await sleep_until(wait)
 
 
 fetch_colors.add_exception_type(Exception)
