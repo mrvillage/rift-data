@@ -1,3 +1,4 @@
+import json
 import sys
 import traceback
 from datetime import datetime, timedelta
@@ -6,7 +7,7 @@ import aiohttp
 from discord.ext import tasks
 from discord.utils import sleep_until
 
-from ...data.db import execute_query_many, execute_read_query
+from ...data.db import execute_query, execute_read_query
 from ...env import GQL_URL, UPDATE_TIMES
 from ...events import dispatch
 
@@ -26,8 +27,7 @@ async def fetch_colors():
         """
         async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
             data = await response.json()
-            raw_colors = {i["color"]: i for i in data["data"]["colors"]}
-            data = {
+            colors = {
                 i["color"]: (
                     i["color"],
                     i["bloc_name"],
@@ -35,29 +35,24 @@ async def fetch_colors():
                 )
                 for i in data["data"]["colors"]
             }
-            old = await execute_read_query("SELECT * FROM colors;")
-            old = [dict(i) for i in old]
-            old = {i["color"]: i for i in old}
-            update = {}
-            for after in data.values():
-                before = tuple(old[after[0]].values())
-                if before != after:
-                    await dispatch(
-                        "color_update",
-                        str(time),
-                        before=old[after[0]],
-                        after=raw_colors[after[0]],
-                    )
-                    update[after[0]] = after
-            await execute_query_many(
+            old = await execute_read_query(
+                "SELECT colors FROM colors ORDER BY datetime DESC LIMIT 1;"
+            )
+            old = json.loads(old[0]["colors"])
+            if old != colors:
+                await dispatch(
+                    "colors_update",
+                    str(time),
+                    before=old,
+                    after=colors,
+                )
+            await execute_query(
                 """
-                UPDATE colors SET
-                color = $1,
-                bloc_name = $2,
-                turn_bonus = $3
-                WHERE color = $1;
+                INSERT INTO colors (datetime, colors)
+                VALUES ($1, $2);
             """,
-                update.values(),
+                str(time),
+                colors,
             )
             await UPDATE_TIMES.set_colors(time)
     except Exception as error:
