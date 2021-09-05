@@ -52,7 +52,7 @@ async def fetch_colors():
                 VALUES ($1, $2);
             """,
                 str(time),
-                colors,
+                json.dumps(colors),
             )
             await UPDATE_TIMES.set_colors(time)
     except Exception as error:
