@@ -44,13 +44,12 @@ async def fetch_treasures():
                 """,
             )
             old = old[0]["treasures"]
+            updated_dispatches = []
             if old != treasures:
-                await dispatch(
-                    "treasures_update",
-                    str(time),
-                    before=loads(old),
-                    after=loads(treasures),
+                updated_dispatches.append(
+                    {"before": loads(old), "after": loads(treasures)}
                 )
+            await dispatch("bulk_treasures_update", str(time), data=updated_dispatches)
             await execute_query(
                 """
                 INSERT INTO treasures (datetime, treasures)

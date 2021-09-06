@@ -51,28 +51,43 @@ async def fetch_pending_trades():
             old = [dict(i) for i in old]
             old = {i["id"]: i for i in old}
             update = {}
+            updated_dispatches = []
+            created_dispatches = []
             for after in data.values():
                 try:
                     before = tuple(old[after[0]].values())
                     if before != after:
-                        await dispatch(
-                            "pending_trade_update",
-                            str(time),
-                            before=old[after[0]],
-                            after=raw_trades[after[0]],
+                        updated_dispatches.append(
+                            {"before": old[after[0]], "after": raw_trades[after[0]]}
                         )
+
                         update[after[0]] = after
                     del old[after[0]]
                 except KeyError:
+                    created_dispatches.append({"trade": raw_trades[after[0]]})
                     await dispatch(
                         "pending_trade_created", str(time), trade=raw_trades[after[0]]
                     )
                     update[after[0]] = after
+            await dispatch(
+                "bulk_pending_trade_update",
+                str(time),
+                data=updated_dispatches,
+            )
+            await dispatch(
+                "bulk_pending_trade_created",
+                str(time),
+                data=created_dispatches,
+            )
+            removed_dispatches = []
             for removed in old.values():
-                await dispatch("pending_trade_removed", str(time), trade=removed)
+                removed_dispatches.append({"trade": removed})
                 await execute_query(
                     "DELETE FROM pending_trades WHERE id = $1;", removed["id"]
                 )
+            await dispatch(
+                "bulk_pending_trade_removed", str(time), data=removed_dispatches
+            )
             await execute_query_many(
                 """
                 INSERT INTO pending_trades (id, date, sender, receiver, offer_resource,

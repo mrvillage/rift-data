@@ -268,25 +268,32 @@ async def fetch_wars():
         old_wars = await execute_read_query("SELECT * FROM wars;")
         old_wars = [dict(i) for i in old_wars]
         old_wars = {i["id"]: i for i in old_wars}
+        attack_dispatches = []
         for attack in attacks.values():
             if attack[0] not in old_attacks:
-                await dispatch("attack", str(time), attack=raw_attacks[attack[0]])
+                attack_dispatches.append({"attack": raw_attacks[attack[0]]})
                 attack_data[attack[0]] = attack
+        await dispatch("bulk_attack", str(time), data=attack_dispatches)
+        declaration_dispatches = []
+        update_dispatches = []
         for after in wars.values():
             try:
                 before = tuple(old_wars[after[0]])
             except KeyError:
-                await dispatch("war_declaration", str(time), war=raw_wars[after[0]])
+                declaration_dispatches.append({"war": raw_wars[after[0]]})
                 war_data[after[0]] = after
                 continue
             if before != after:
-                await dispatch(
-                    "war_update",
-                    str(time),
-                    before=old_wars[after[0]],
-                    after=raw_wars[after[0]],
+                update_dispatches.append(
+                    {"before": old_wars[after[0]], "after": raw_wars[after[0]]}
                 )
                 war_data[after[0]] = after
+        await dispatch("bulk_war_declaration", str(time), data=declaration_dispatches)
+        await dispatch(
+            "bulk_war_update",
+            str(time),
+            data=update_dispatches,
+        )
         await execute_query_many(
             """
             INSERT INTO wars (id, date, reason, war_type, active, ground_control,

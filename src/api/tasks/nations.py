@@ -71,26 +71,33 @@ async def fetch_nations():
         update = {}
         for i in old.values():
             i["score"] = round(i["score"], 2)
+        updated_dispatches = []
+        created_dispatches = []
         for after in data.values():
             try:
                 before = tuple(old[after[0]].values())
                 if before != after:
-                    await dispatch(
-                        "nation_update",
-                        str(time),
-                        before=old[after[0]],
-                        after=raw_nations[after[0]],
+                    updated_dispatches.append(
+                        {"before": old[after[0]], "after": raw_nations[after[0]]}
                     )
+
                     update[after[0]] = after
                 del old[after[0]]
             except KeyError:
-                await dispatch(
-                    "nation_created", str(time), nation=raw_nations[after[0]]
-                )
+                created_dispatches.append({"nation": raw_nations[after[0]]})
+
                 update[after[0]] = after
+        await dispatch(
+            "bulk_nation_update",
+            str(time),
+            data=updated_dispatches,
+        )
+        await dispatch("bulk_nation_created", str(time), data=created_dispatches)
+        deleted_dispatches = []
         for deleted in old.values():
-            await dispatch("nation_deleted", str(time), nation=deleted)
+            deleted_dispatches.append({"nation": deleted})
             await execute_query("DELETE FROM nations WHERE id = $1;", deleted["id"])
+        await dispatch("bulk_nation_deleted", str(time), data=deleted_dispatches)
         await execute_query_many(
             """
             INSERT INTO nations (id, name, leader, continent, war_policy,

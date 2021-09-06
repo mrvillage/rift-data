@@ -49,28 +49,33 @@ async def fetch_alliances():
             for i in old.values():
                 i["score"] = round(i["score"], 2) if i["score"] is not None else None
                 i["avg_score"] = round(i["avg_score"], 4)
+            updated_dispatches = []
+            created_dispatches = []
             for after in data.values():
                 try:
                     before = tuple(old[after[0]].values())
                     if before != after:
-                        await dispatch(
-                            "alliance_update",
-                            str(time),
-                            before=old[after[0]],
-                            after=raw_alliances[after[0]],
+                        updated_dispatches.append(
+                            {"before": old[after[0]], "after": raw_alliances[after[0]]}
                         )
                         update[after[0]] = after
                     del old[after[0]]
                 except KeyError:
-                    await dispatch(
-                        "alliance_created", str(time), alliance=raw_alliances[after[0]]
-                    )
+                    created_dispatches.append(raw_alliances[after[0]])
                     update[after[0]] = after
+            await dispatch(
+                "bulk_alliance_update",
+                str(time),
+                data=updated_dispatches,
+            )
+            await dispatch("bulk_alliance_created", str(time), data=created_dispatches)
+            deleted_dispatches = []
             for deleted in old.values():
-                await dispatch("alliance_deleted", str(time), alliance=deleted)
+                deleted_dispatches.append({"alliance": deleted})
                 await execute_query(
                     "DELETE FROM alliances WHERE id = $1;", deleted["id"]
                 )
+            await dispatch("bulk_alliance_deleted", str(time), data=deleted_dispatches)
             await execute_query_many(
                 """
                 INSERT INTO alliances (id, found_date, name, acronym, color, rank,

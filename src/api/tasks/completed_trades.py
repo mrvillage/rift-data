@@ -50,12 +50,12 @@ async def fetch_trades():
             old = await execute_read_query("SELECT id FROM completed_trades;")
             old = [i["id"] for i in old]
             update = {}
+            completed_dispatches = []
             for trade in data.values():
                 if trade[0] not in old:
-                    await dispatch(
-                        "trade_completed", str(time), trade=raw_trades[trade[0]]
-                    )
+                    completed_dispatches.append({"trade": raw_trades[trade[0]]})
                     update[trade[0]] = trade
+            await dispatch("bulk_trade_completed", str(time), data=completed_dispatches)
             await execute_query_many(
                 """
                 INSERT INTO completed_trades (id, date, sender, receiver, offer_resource,
