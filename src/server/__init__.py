@@ -2,14 +2,25 @@ import asyncio
 import ssl
 import sys
 import traceback
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Coroutine
 
 from aiohttp import web
-from aiohttp.http_websocket import WSMsgType
 from aiohttp.web_request import BaseRequest
 
 
+def wrap_send(coro: Coroutine[Any, Any, None]) -> Coroutine[Any, Any, Any]:
+    async def predicate(data):
+        try:
+            await coro(data)  # type: ignore
+        except ConnectionResetError:
+            pass
+
+    return predicate  # type: ignore
+
+
 class SocketServer:
+    sockets: list[dict[str, web.WebSocketResponse]]
+
     def __init__(
         self, *, auth_code: str, loop: asyncio.AbstractEventLoop, port: int = 9093
     ):
@@ -96,5 +107,5 @@ class SocketServer:
         self.loop.create_task(self.start_coro())
 
     async def send_all(self, data: dict[str, Any]) -> None:
-        coros = [socket["socket"].send_json(data) for socket in self.sockets]
+        coros = [wrap_send(socket["socket"].send_json(data)) for socket in self.sockets]
         await asyncio.gather(*coros)
