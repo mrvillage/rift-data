@@ -45,10 +45,6 @@ async def fetch_market_prices():
                 """,
             )
             old = dict(old[0])
-            if old != data:
-                await dispatch(
-                    "market_prices_update", str(time), before=old, after=data
-                )
             await execute_query(
                 """
                 INSERT INTO market_prices (datetime, credit, coal, oil, uranium,
@@ -59,6 +55,10 @@ async def fetch_market_prices():
                 *list(data.values()),
             )
             await UPDATE_TIMES.set_market_prices(time)
+            if old != data:
+                await dispatch(
+                    "market_prices_update", str(time), before=old, after=data
+                )
     except Exception as error:
         print("Ignoring exception in market_prices:", file=sys.stderr)
         traceback.print_exception(

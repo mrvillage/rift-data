@@ -32,13 +32,6 @@ async def fetch_colors():
                 "SELECT colors FROM colors ORDER BY datetime DESC LIMIT 1;"
             )
             old = json.loads(old[0]["colors"])
-            if old != colors:
-                await dispatch(
-                    "colors_update",
-                    str(time),
-                    before=old,
-                    after=colors,
-                )
             await execute_query(
                 """
                 INSERT INTO colors (datetime, colors)
@@ -48,6 +41,13 @@ async def fetch_colors():
                 json.dumps(colors),
             )
             await UPDATE_TIMES.set_colors(time)
+            if old != colors:
+                await dispatch(
+                    "colors_update",
+                    str(time),
+                    before=old,
+                    after=colors,
+                )
     except Exception as error:
         print("Ignoring exception in colors:", file=sys.stderr)
         traceback.print_exception(

@@ -87,20 +87,10 @@ async def fetch_nations():
                 created_dispatches.append({"nation": raw_nations[after[0]]})
 
                 update[after[0]] = after
-        if updated_dispatches:
-            await dispatch(
-                "bulk_nation_update",
-                str(time),
-                data=updated_dispatches,
-            )
-        if created_dispatches:
-            await dispatch("bulk_nation_created", str(time), data=created_dispatches)
         deleted_dispatches = []
         for deleted in old.values():
             deleted_dispatches.append({"nation": deleted})
             await execute_query("DELETE FROM nations WHERE id = $1;", deleted["id"])
-        if deleted_dispatches:
-            await dispatch("bulk_nation_deleted", str(time), data=deleted_dispatches)
         await execute_query_many(
             """
             INSERT INTO nations (id, name, leader, continent, war_policy,
@@ -139,6 +129,16 @@ async def fetch_nations():
             update.values(),
         )
         await UPDATE_TIMES.set_nations(time)
+        if updated_dispatches:
+            await dispatch(
+                "bulk_nation_update",
+                str(time),
+                data=updated_dispatches,
+            )
+        if created_dispatches:
+            await dispatch("bulk_nation_created", str(time), data=created_dispatches)
+        if deleted_dispatches:
+            await dispatch("bulk_nation_deleted", str(time), data=deleted_dispatches)
     except Exception as error:
         print("Ignoring exception in nations:", file=sys.stderr)
         traceback.print_exception(

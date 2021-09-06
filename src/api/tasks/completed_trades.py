@@ -55,10 +55,6 @@ async def fetch_trades():
                 if trade[0] not in old:
                     completed_dispatches.append({"trade": raw_trades[trade[0]]})
                     update[trade[0]] = trade
-            if completed_dispatches:
-                await dispatch(
-                    "bulk_trade_completed", str(time), data=completed_dispatches
-                )
             await execute_query_many(
                 """
                 INSERT INTO completed_trades (id, date, sender, receiver, offer_resource,
@@ -68,6 +64,10 @@ async def fetch_trades():
                 update.values(),
             )
             await UPDATE_TIMES.set_completed_trades(time)
+            if completed_dispatches:
+                await dispatch(
+                    "bulk_trade_completed", str(time), data=completed_dispatches
+                )
     except Exception as error:
         print("Ignoring exception in completed_trades:", file=sys.stderr)
         traceback.print_exception(

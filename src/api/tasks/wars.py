@@ -273,8 +273,6 @@ async def fetch_wars():
             if attack[0] not in old_attacks:
                 attack_dispatches.append({"attack": raw_attacks[attack[0]]})
                 attack_data[attack[0]] = attack
-        if attack_dispatches:
-            await dispatch("bulk_attack", str(time), data=attack_dispatches)
         declaration_dispatches = []
         update_dispatches = []
         for after in wars.values():
@@ -289,16 +287,6 @@ async def fetch_wars():
                     {"before": old_wars[after[0]], "after": raw_wars[after[0]]}
                 )
                 war_data[after[0]] = after
-        if declaration_dispatches:
-            await dispatch(
-                "bulk_war_declaration", str(time), data=declaration_dispatches
-            )
-        if update_dispatches:
-            await dispatch(
-                "bulk_war_update",
-                str(time),
-                data=update_dispatches,
-            )
         await execute_query_many(
             """
             INSERT INTO wars (id, date, reason, war_type, active, ground_control,
@@ -383,6 +371,18 @@ async def fetch_wars():
             attack_data.values(),
         )
         await UPDATE_TIMES.set_wars(time)
+        if attack_dispatches:
+            await dispatch("bulk_attack", str(time), data=attack_dispatches)
+        if declaration_dispatches:
+            await dispatch(
+                "bulk_war_declaration", str(time), data=declaration_dispatches
+            )
+        if update_dispatches:
+            await dispatch(
+                "bulk_war_update",
+                str(time),
+                data=update_dispatches,
+            )
     except Exception as error:
         print("Ignoring exception in wars:", file=sys.stderr)
         traceback.print_exception(

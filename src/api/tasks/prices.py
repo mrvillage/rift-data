@@ -66,8 +66,6 @@ async def fetch_prices():
             """,
         )
         old = tuple(old[0])
-        if old != data:
-            await dispatch("prices_update", str(time), before=old, after=data)
         await execute_query(
             """
             INSERT INTO prices (datetime, credit, coal, oil, uranium,
@@ -78,6 +76,8 @@ async def fetch_prices():
             *data,
         )
         await UPDATE_TIMES.set_prices(time)
+        if old != data:
+            await dispatch("prices_update", str(time), before=old, after=data)
     except Exception as error:
         print("Ignoring exception in prices:", file=sys.stderr)
         traceback.print_exception(

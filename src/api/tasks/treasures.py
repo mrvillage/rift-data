@@ -49,10 +49,6 @@ async def fetch_treasures():
                 updated_dispatches.append(
                     {"before": loads(old), "after": loads(treasures)}
                 )
-            if updated_dispatches:
-                await dispatch(
-                    "bulk_treasures_update", str(time), data=updated_dispatches
-                )
             await execute_query(
                 """
                 INSERT INTO treasures (datetime, treasures)
@@ -62,6 +58,10 @@ async def fetch_treasures():
                 treasures,
             )
             await UPDATE_TIMES.set_treasures(time)
+            if updated_dispatches:
+                await dispatch(
+                    "bulk_treasures_update", str(time), data=updated_dispatches
+                )
     except Exception as error:
         print("Ignoring exception in treasures:", file=sys.stderr)
         traceback.print_exception(

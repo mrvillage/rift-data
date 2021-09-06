@@ -54,20 +54,10 @@ async def fetch_cities():
                 except KeyError:
                     created_dispatches.append({"city": raw_cities[after[0]]})
                     update[after[0]] = after
-            if updated_dispatches:
-                await dispatch(
-                    "bulk_city_update",
-                    str(time),
-                    data=updated_dispatches,
-                )
-            if created_dispatches:
-                await dispatch("bulk_city_created", str(time), data=created_dispatches)
             deleted_dispatches = []
             for deleted in old.values():
                 deleted_dispatches.append({"city": deleted})
                 await execute_query("DELETE FROM cities WHERE id = $1;", deleted["id"])
-            if deleted_dispatches:
-                await dispatch("bulk_city_deleted", str(time), data=deleted_dispatches)
             await execute_query_many(
                 """
                 INSERT INTO cities (id, nation_id, name, capital,
@@ -84,6 +74,16 @@ async def fetch_cities():
                 update.values(),
             )
             await UPDATE_TIMES.set_cities(time)
+            if updated_dispatches:
+                await dispatch(
+                    "bulk_city_update",
+                    str(time),
+                    data=updated_dispatches,
+                )
+            if created_dispatches:
+                await dispatch("bulk_city_created", str(time), data=created_dispatches)
+            if deleted_dispatches:
+                await dispatch("bulk_city_deleted", str(time), data=deleted_dispatches)
     except Exception as error:
         print("Ignoring exception in cities:", file=sys.stderr)
         traceback.print_exception(

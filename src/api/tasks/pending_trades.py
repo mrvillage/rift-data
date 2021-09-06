@@ -66,27 +66,11 @@ async def fetch_pending_trades():
                 except KeyError:
                     created_dispatches.append({"trade": raw_trades[after[0]]})
                     update[after[0]] = after
-            if updated_dispatches:
-                await dispatch(
-                    "bulk_pending_trade_update",
-                    str(time),
-                    data=updated_dispatches,
-                )
-            if created_dispatches:
-                await dispatch(
-                    "bulk_pending_trade_created",
-                    str(time),
-                    data=created_dispatches,
-                )
             removed_dispatches = []
             for removed in old.values():
                 removed_dispatches.append({"trade": removed})
                 await execute_query(
                     "DELETE FROM pending_trades WHERE id = $1;", removed["id"]
-                )
-            if removed_dispatches:
-                await dispatch(
-                    "bulk_pending_trade_removed", str(time), data=removed_dispatches
                 )
             await execute_query_many(
                 """
@@ -106,6 +90,22 @@ async def fetch_pending_trades():
                 update.values(),
             )
             await UPDATE_TIMES.set_pending_trades(time)
+            if updated_dispatches:
+                await dispatch(
+                    "bulk_pending_trade_update",
+                    str(time),
+                    data=updated_dispatches,
+                )
+            if created_dispatches:
+                await dispatch(
+                    "bulk_pending_trade_created",
+                    str(time),
+                    data=created_dispatches,
+                )
+            if removed_dispatches:
+                await dispatch(
+                    "bulk_pending_trade_removed", str(time), data=removed_dispatches
+                )
     except Exception as error:
         print("Ignoring exception in pending_trades:", file=sys.stderr)
         traceback.print_exception(
