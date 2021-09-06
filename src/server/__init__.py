@@ -107,5 +107,5 @@ class SocketServer:
         self.loop.create_task(self.start_coro())
 
     async def send_all(self, data: dict[str, Any]) -> None:
-        coros = [wrap_send(socket["socket"].send_json(data)) for socket in self.sockets]
+        coros = [wrap_send(socket["socket"].send_json)(data) for socket in self.sockets]  # type: ignore
         await asyncio.gather(*coros)
