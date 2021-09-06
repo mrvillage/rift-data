@@ -65,9 +65,6 @@ async def fetch_pending_trades():
                     del old[after[0]]
                 except KeyError:
                     created_dispatches.append({"trade": raw_trades[after[0]]})
-                    await dispatch(
-                        "pending_trade_created", str(time), trade=raw_trades[after[0]]
-                    )
                     update[after[0]] = after
             if updated_dispatches:
                 await dispatch(
