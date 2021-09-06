@@ -69,25 +69,28 @@ async def fetch_pending_trades():
                         "pending_trade_created", str(time), trade=raw_trades[after[0]]
                     )
                     update[after[0]] = after
-            await dispatch(
-                "bulk_pending_trade_update",
-                str(time),
-                data=updated_dispatches,
-            )
-            await dispatch(
-                "bulk_pending_trade_created",
-                str(time),
-                data=created_dispatches,
-            )
+            if updated_dispatches:
+                await dispatch(
+                    "bulk_pending_trade_update",
+                    str(time),
+                    data=updated_dispatches,
+                )
+            if created_dispatches:
+                await dispatch(
+                    "bulk_pending_trade_created",
+                    str(time),
+                    data=created_dispatches,
+                )
             removed_dispatches = []
             for removed in old.values():
                 removed_dispatches.append({"trade": removed})
                 await execute_query(
                     "DELETE FROM pending_trades WHERE id = $1;", removed["id"]
                 )
-            await dispatch(
-                "bulk_pending_trade_removed", str(time), data=removed_dispatches
-            )
+            if removed_dispatches:
+                await dispatch(
+                    "bulk_pending_trade_removed", str(time), data=removed_dispatches
+                )
             await execute_query_many(
                 """
                 INSERT INTO pending_trades (id, date, sender, receiver, offer_resource,

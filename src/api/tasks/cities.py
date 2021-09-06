@@ -49,28 +49,25 @@ async def fetch_cities():
                         updated_dispatches.append(
                             {"before": old[after[0]], "after": raw_cities[after[0]]}
                         )
-                        await dispatch(
-                            "city_update",
-                            str(time),
-                            before=old[after[0]],
-                            after=raw_cities[after[0]],
-                        )
                         update[after[0]] = after
                     del old[after[0]]
                 except KeyError:
                     created_dispatches.append({"city": raw_cities[after[0]]})
                     update[after[0]] = after
-            await dispatch(
-                "bulk_city_update",
-                str(time),
-                data=updated_dispatches,
-            )
-            await dispatch("bulk_city_created", str(time), data=created_dispatches)
+            if updated_dispatches:
+                await dispatch(
+                    "bulk_city_update",
+                    str(time),
+                    data=updated_dispatches,
+                )
+            if created_dispatches:
+                await dispatch("bulk_city_created", str(time), data=created_dispatches)
             deleted_dispatches = []
             for deleted in old.values():
                 deleted_dispatches.append({"city": deleted})
                 await execute_query("DELETE FROM cities WHERE id = $1;", deleted["id"])
-            await dispatch("bulk_city_deleted", str(time), data=deleted_dispatches)
+            if deleted_dispatches:
+                await dispatch("bulk_city_deleted", str(time), data=deleted_dispatches)
             await execute_query_many(
                 """
                 INSERT INTO cities (id, nation_id, name, capital,

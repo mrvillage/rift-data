@@ -63,19 +63,26 @@ async def fetch_alliances():
                 except KeyError:
                     created_dispatches.append(raw_alliances[after[0]])
                     update[after[0]] = after
-            await dispatch(
-                "bulk_alliance_update",
-                str(time),
-                data=updated_dispatches,
-            )
-            await dispatch("bulk_alliance_created", str(time), data=created_dispatches)
+            if updated_dispatches:
+                await dispatch(
+                    "bulk_alliance_update",
+                    str(time),
+                    data=updated_dispatches,
+                )
+            if created_dispatches:
+                await dispatch(
+                    "bulk_alliance_created", str(time), data=created_dispatches
+                )
             deleted_dispatches = []
             for deleted in old.values():
                 deleted_dispatches.append({"alliance": deleted})
                 await execute_query(
                     "DELETE FROM alliances WHERE id = $1;", deleted["id"]
                 )
-            await dispatch("bulk_alliance_deleted", str(time), data=deleted_dispatches)
+            if deleted_dispatches:
+                await dispatch(
+                    "bulk_alliance_deleted", str(time), data=deleted_dispatches
+                )
             await execute_query_many(
                 """
                 INSERT INTO alliances (id, found_date, name, acronym, color, rank,

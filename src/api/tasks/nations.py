@@ -87,17 +87,20 @@ async def fetch_nations():
                 created_dispatches.append({"nation": raw_nations[after[0]]})
 
                 update[after[0]] = after
-        await dispatch(
-            "bulk_nation_update",
-            str(time),
-            data=updated_dispatches,
-        )
-        await dispatch("bulk_nation_created", str(time), data=created_dispatches)
+        if updated_dispatches:
+            await dispatch(
+                "bulk_nation_update",
+                str(time),
+                data=updated_dispatches,
+            )
+        if created_dispatches:
+            await dispatch("bulk_nation_created", str(time), data=created_dispatches)
         deleted_dispatches = []
         for deleted in old.values():
             deleted_dispatches.append({"nation": deleted})
             await execute_query("DELETE FROM nations WHERE id = $1;", deleted["id"])
-        await dispatch("bulk_nation_deleted", str(time), data=deleted_dispatches)
+        if deleted_dispatches:
+            await dispatch("bulk_nation_deleted", str(time), data=deleted_dispatches)
         await execute_query_many(
             """
             INSERT INTO nations (id, name, leader, continent, war_policy,
