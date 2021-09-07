@@ -58,7 +58,7 @@ async def fetch_colors():
 @fetch_colors.before_loop
 async def before_loop():
     now = datetime.utcnow()
-    wait = now.replace(minute=1, second=0)
+    wait = now.replace(minute=4, second=0)
     while wait < now:
         wait += timedelta(minutes=30)
     await sleep_until(wait)
