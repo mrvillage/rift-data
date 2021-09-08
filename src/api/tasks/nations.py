@@ -34,37 +34,37 @@ async def fetch_nations():
         time = datetime.utcnow()
         responses = await asyncio.gather(city_one(), city_two())
         fetched_data = [*responses[0], *responses[1]]
-        raw_nations = {int(i["nation_id"]): i for i in fetched_data}
-        data = {
-            int(i["nation_id"]): (
-                int(i["nation_id"]),
-                i["nation"],
-                i["leader"],
-                int(i["continent"]),
-                int(i["war_policy"]),
-                int(i["domestic_policy"]),
-                int(i["color"]),
-                int(i["alliance_id"]),
-                i["alliance"],
-                int(i["alliance_position"]),
-                int(i["cities"]),
-                int(i["offensive_wars"]),
-                int(i["defensive_wars"]),
-                float(i["score"]),
-                bool(i["v_mode"]),
-                int(i["v_mode_turns"]),
-                int(i["beige_turns"]),
-                i["last_active"],
-                i["founded"],
-                int(i["soldiers"]),
-                int(i["tanks"]),
-                int(i["aircraft"]),
-                int(i["ships"]),
-                int(i["missiles"]),
-                int(i["nukes"]),
-            )
+        nations = {
+            int(i["nation_id"]): {
+                "id": int(i["nation_id"]),
+                "name": i["nation"],
+                "leader": i["leader"],
+                "continent": int(i["continent"]),
+                "war_policy": int(i["war_policy"]),
+                "domestic_policy": int(i["domestic_policy"]),
+                "color": int(i["color"]),
+                "alliance_id": int(i["alliance_id"]),
+                "alliance": i["alliance"],
+                "alliance_position": int(i["alliance_position"]),
+                "cities": int(i["cities"]),
+                "offensive_wars": int(i["offensive_wars"]),
+                "defensive_wars": int(i["defensive_wars"]),
+                "score": float(i["score"]),
+                "v_mode": bool(i["v_mode"]),
+                "v_mode_turns": int(i["v_mode_turns"]),
+                "beige_turns": int(i["beige_turns"]),
+                "last_active": i["last_active"],
+                "founded": i["founded"],
+                "soldiers": int(i["soldiers"]),
+                "tanks": int(i["tanks"]),
+                "aircraft": int(i["aircraft"]),
+                "ships": int(i["ships"]),
+                "missiles": int(i["missiles"]),
+                "nukes": int(i["nukes"]),
+            }
             for i in fetched_data
         }
+        data = {key: tuple(value.values()) for key, value in nations.items()}
         old = await execute_read_query("SELECT * FROM nations;")
         old = [dict(i) for i in old]
         old = {i["id"]: i for i in old}
@@ -78,13 +78,12 @@ async def fetch_nations():
                 before = tuple(old[after[0]].values())
                 if before != after:
                     updated_dispatches.append(
-                        {"before": old[after[0]], "after": raw_nations[after[0]]}
+                        {"before": old[after[0]], "after": nations[after[0]]}
                     )
-
                     update[after[0]] = after
                 del old[after[0]]
             except KeyError:
-                created_dispatches.append({"nation": raw_nations[after[0]]})
+                created_dispatches.append({"nation": nations[after[0]]})
 
                 update[after[0]] = after
         deleted_dispatches = []

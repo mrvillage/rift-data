@@ -19,29 +19,33 @@ async def fetch_alliances():
             "GET", f"{BASEURL}/alliances/?key={APIKEY}"
         ) as response:
             data = await response.json()
-            raw_alliances = {int(i["id"]): i for i in data["alliances"]}
-            data = {
-                int(i["id"]): (
-                    int(i["id"]),
-                    i["founddate"],
-                    i["name"],
-                    i["acronym"],
-                    i["color"],
-                    int(i["rank"]),
-                    int(i["members"]) if "members" in i else None,
-                    float(i["score"]) if "score" in i else None,
-                    str([int(j) for j in i["officerids"]])
+            alliances = {
+                int(i["id"]): {
+                    "id": int(i["id"]),
+                    "found_date": i["founddate"],
+                    "name": i["name"],
+                    "acronym": i["acronym"],
+                    "color": i["color"],
+                    "nk": int(i["rank"]),
+                    "members": int(i["members"]) if "members" in i else None,
+                    "score": float(i["score"]) if "score" in i else None,
+                    "officer_ids": str([int(j) for j in i["officerids"]])
                     if "officerids" in i
                     else None,
-                    str([int(j) for j in i["heirids"]]) if "heirids" in i else None,
-                    str([int(j) for j in i["leaderids"]]) if "leaderids" in i else None,
-                    float(i["avgscore"]),
-                    str(i["flagurl"]) if i["flagurl"] != "" else None,
-                    str(i["forumurl"]) if i["forumurl"] != "" else None,
-                    str(i["ircchan"]) if i["ircchan"] != "" else None,
-                )
+                    "heir_ids": str([int(j) for j in i["heirids"]])
+                    if "heirids" in i
+                    else None,
+                    "leader_ids": str([int(j) for j in i["leaderids"]])
+                    if "leaderids" in i
+                    else None,
+                    "avg_score": float(i["avgscore"]),
+                    "flag_url": str(i["flagurl"]) if i["flagurl"] != "" else None,
+                    "forum_url": str(i["forumurl"]) if i["forumurl"] != "" else None,
+                    "ircchan": str(i["ircchan"]) if i["ircchan"] != "" else None,
+                }
                 for i in data["alliances"]
             }
+            data = {key: tuple(value.values()) for key, value in alliances.items()}
             old = await execute_read_query("SELECT * FROM alliances;")
             old = [dict(i) for i in old]
             old = {i["id"]: i for i in old}
@@ -56,12 +60,12 @@ async def fetch_alliances():
                     before = tuple(old[after[0]].values())
                     if before != after:
                         updated_dispatches.append(
-                            {"before": old[after[0]], "after": raw_alliances[after[0]]}
+                            {"before": old[after[0]], "after": alliances[after[0]]}
                         )
                         update[after[0]] = after
                     del old[after[0]]
                 except KeyError:
-                    created_dispatches.append(raw_alliances[after[0]])
+                    created_dispatches.append(alliances[after[0]])
                     update[after[0]] = after
             deleted_dispatches = []
             for deleted in old.values():

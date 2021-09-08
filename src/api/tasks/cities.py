@@ -19,19 +19,19 @@ async def fetch_cities():
             "GET", f"{BASEURL}/all-cities/key={APIKEY}"
         ) as response:
             data = await response.json()
-            raw_cities = {int(i["city_id"]): i for i in data["all_cities"]}
-            data = {
-                int(i["city_id"]): (
-                    int(i["city_id"]),
-                    int(i["nation_id"]),
-                    i["city_name"],
-                    bool(int(i["capital"])),
-                    float(i["infrastructure"]),
-                    float(i["maxinfra"]),
-                    float(i["land"]),
-                )
+            cities = {
+                int(i["city_id"]): {
+                    "id": int(i["city_id"]),
+                    "nation_id": int(i["nation_id"]),
+                    "name": i["city_name"],
+                    "capital": bool(int(i["capital"])),
+                    "infrastructure": float(i["infrastructure"]),
+                    "max_infra": float(i["maxinfra"]),
+                    "land": float(i["land"]),
+                }
                 for i in data["all_cities"]
             }
+            data = {key: tuple(value) for key, value in cities.items()}
             old = await execute_read_query("SELECT * FROM cities;")
             old = [dict(i) for i in old]
             old = {i["id"]: i for i in old}
@@ -47,12 +47,12 @@ async def fetch_cities():
                     before = tuple(old[after[0]].values())
                     if before != after:
                         updated_dispatches.append(
-                            {"before": old[after[0]], "after": raw_cities[after[0]]}
+                            {"before": old[after[0]], "after": cities[after[0]]}
                         )
                         update[after[0]] = after
                     del old[after[0]]
                 except KeyError:
-                    created_dispatches.append({"city": raw_cities[after[0]]})
+                    created_dispatches.append({"city": cities[after[0]]})
                     update[after[0]] = after
             deleted_dispatches = []
             for deleted in old.values():
