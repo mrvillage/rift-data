@@ -26,7 +26,7 @@ async def fetch_alliances():
                     "name": i["name"],
                     "acronym": i["acronym"],
                     "color": i["color"],
-                    "nk": int(i["rank"]),
+                    "rank": int(i["rank"]),
                     "members": int(i["members"]) if "members" in i else None,
                     "score": float(i["score"]) if "score" in i else None,
                     "officer_ids": [int(j) for j in i["officerids"]]
