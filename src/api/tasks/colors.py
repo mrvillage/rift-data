@@ -1,4 +1,3 @@
-import json
 import sys
 import traceback
 from datetime import datetime, timedelta
@@ -31,14 +30,14 @@ async def fetch_colors():
             old = await execute_read_query(
                 "SELECT colors FROM colors ORDER BY datetime DESC LIMIT 1;"
             )
-            old = json.loads(old[0]["colors"])
+            old = old[0]["colors"]
             await execute_query(
                 """
                 INSERT INTO colors (datetime, colors)
                 VALUES ($1, $2);
             """,
                 str(time),
-                json.dumps(colors),
+                colors,
             )
             await UPDATE_TIMES.set_colors(time)
             if old != colors:

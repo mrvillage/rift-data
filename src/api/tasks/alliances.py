@@ -29,13 +29,13 @@ async def fetch_alliances():
                     "nk": int(i["rank"]),
                     "members": int(i["members"]) if "members" in i else None,
                     "score": float(i["score"]) if "score" in i else None,
-                    "officer_ids": str([int(j) for j in i["officerids"]])
+                    "officer_ids": [int(j) for j in i["officerids"]]
                     if "officerids" in i
                     else None,
-                    "heir_ids": str([int(j) for j in i["heirids"]])
+                    "heir_ids": [int(j) for j in i["heirids"]]
                     if "heirids" in i
                     else None,
-                    "leader_ids": str([int(j) for j in i["leaderids"]])
+                    "leader_ids": [int(j) for j in i["leaderids"]]
                     if "leaderids" in i
                     else None,
                     "avg_score": float(i["avgscore"]),
