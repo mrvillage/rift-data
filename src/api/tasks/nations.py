@@ -83,12 +83,12 @@ async def fetch_nations():
                     update[after[0]] = after
                 del old[after[0]]
             except KeyError:
-                created_dispatches.append({"nation": nations[after[0]]})
+                created_dispatches.append(nations[after[0]])
 
                 update[after[0]] = after
         deleted_dispatches = []
         for deleted in old.values():
-            deleted_dispatches.append({"nation": deleted})
+            deleted_dispatches.append(deleted)
             await execute_query("DELETE FROM nations WHERE id = $1;", deleted["id"])
         await execute_query_many(
             """

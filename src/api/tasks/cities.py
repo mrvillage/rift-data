@@ -52,11 +52,11 @@ async def fetch_cities():
                         update[after[0]] = after
                     del old[after[0]]
                 except KeyError:
-                    created_dispatches.append({"city": cities[after[0]]})
+                    created_dispatches.append(cities[after[0]])
                     update[after[0]] = after
             deleted_dispatches = []
             for deleted in old.values():
-                deleted_dispatches.append({"city": deleted})
+                deleted_dispatches.append(deleted)
                 await execute_query("DELETE FROM cities WHERE id = $1;", deleted["id"])
             await execute_query_many(
                 """

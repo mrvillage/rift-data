@@ -53,7 +53,7 @@ async def fetch_trades():
             completed_dispatches = []
             for trade in data.values():
                 if trade[0] not in old:
-                    completed_dispatches.append({"trade": raw_trades[trade[0]]})
+                    completed_dispatches.append(raw_trades[trade[0]])
                     update[trade[0]] = trade
             await execute_query_many(
                 """

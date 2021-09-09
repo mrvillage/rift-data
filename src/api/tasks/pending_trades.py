@@ -64,11 +64,11 @@ async def fetch_pending_trades():
                         update[after[0]] = after
                     del old[after[0]]
                 except KeyError:
-                    created_dispatches.append({"trade": raw_trades[after[0]]})
+                    created_dispatches.append(raw_trades[after[0]])
                     update[after[0]] = after
             removed_dispatches = []
             for removed in old.values():
-                removed_dispatches.append({"trade": removed})
+                removed_dispatches.append(removed)
                 await execute_query(
                     "DELETE FROM pending_trades WHERE id = $1;", removed["id"]
                 )

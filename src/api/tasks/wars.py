@@ -271,7 +271,7 @@ async def fetch_wars():
         attack_dispatches = []
         for attack in attacks.values():
             if attack[0] not in old_attacks:
-                attack_dispatches.append({"attack": raw_attacks[attack[0]]})
+                attack_dispatches.append(raw_attacks[attack[0]])
                 attack_data[attack[0]] = attack
         declaration_dispatches = []
         update_dispatches = []
@@ -279,7 +279,7 @@ async def fetch_wars():
             try:
                 before = tuple(old_wars[after[0]])
             except KeyError:
-                declaration_dispatches.append({"war": raw_wars[after[0]]})
+                declaration_dispatches.append(raw_wars[after[0]])
                 war_data[after[0]] = after
                 continue
             if before != after:

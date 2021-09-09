@@ -69,7 +69,7 @@ async def fetch_alliances():
                     update[after[0]] = after
             deleted_dispatches = []
             for deleted in old.values():
-                deleted_dispatches.append({"alliance": deleted})
+                deleted_dispatches.append(deleted)
                 await execute_query(
                     "DELETE FROM alliances WHERE id = $1;", deleted["id"]
                 )
