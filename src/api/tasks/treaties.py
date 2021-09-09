@@ -89,7 +89,7 @@ async def fetch_treaties():
         )
         await UPDATE_TIMES.set_treaties(time)
         if new_dispatches:
-            await dispatch("new_treaty", new_dispatches[0][0], data=new_dispatches)
+            await dispatch("bulk_new_treaty", new_dispatches[0][0], data=new_dispatches)
         if expired_dispatches:
             await dispatch("bulk_treaty_expired", str(time), data=expired_dispatches)
     except Exception as error:
