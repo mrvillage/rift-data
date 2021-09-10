@@ -64,14 +64,29 @@ async def fetch_treaties():
         for treaty in purged_treaties:
             if set(treaty[1:]) not in short_old_treaties:
                 treaty = (treaty[0], None, treaty[1], treaty[2], treaty[3])
-                new_dispatches.append(treaty)
+                new_dispatches.append(
+                    {
+                        "started": treaty[0],
+                        "ended": treaty[1],
+                        "from_": treaty[2],
+                        "to_": treaty[3],
+                        "treaty_type": treaty[4],
+                    })
                 new_treaties.append(treaty)
         expired_treaties = []
         expired_dispatches = []
         for treaty in old_treaties:
             if set(treaty[1:]) not in short_purged_treaties:
                 treaty = (treaty[0], str(time), treaty[1], treaty[2], treaty[3])
-                expired_dispatches.append(treaty)
+                expired_dispatches.append(
+                    {
+                        "started": treaty[0],
+                        "ended": treaty[1],
+                        "from_": treaty[2],
+                        "to_": treaty[3],
+                        "treaty_type": treaty[4],
+                    }
+                )
                 expired_treaties.append(treaty)
         await execute_query_many(
             """
