@@ -44,20 +44,20 @@ async def fetch_prices():
             request("aluminum"),
             request("food"),
         )
-        data = (
-            dumps(credit),
-            dumps(coal),
-            dumps(oil),
-            dumps(uranium),
-            dumps(lead),
-            dumps(iron),
-            dumps(bauxite),
-            dumps(gasoline),
-            dumps(munitions),
-            dumps(steel),
-            dumps(aluminum),
-            dumps(food),
-        )
+        data = {
+            "credit": dumps(credit),
+            "coal": dumps(coal),
+            "oil": dumps(oil),
+            "uranium": dumps(uranium),
+            "lead": dumps(lead),
+            "iron": dumps(iron),
+            "bauxite": dumps(bauxite),
+            "gasoline": dumps(gasoline),
+            "munitions": dumps(munitions),
+            "steel": dumps(steel),
+            "aluminum": dumps(aluminum),
+            "food": dumps(food),
+        }
         old = await execute_read_query(
             """
             SELECT credit, coal, oil, uranium,
@@ -65,7 +65,7 @@ async def fetch_prices():
             aluminum, food FROM prices ORDER BY datetime DESC LIMIT 1;
             """,
         )
-        old = tuple(old[0])
+        old = dict(old[0])
         await execute_query(
             """
             INSERT INTO prices (datetime, credit, coal, oil, uranium,
@@ -73,7 +73,7 @@ async def fetch_prices():
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
             """,
             str(time),
-            *data,
+            *list(data.values()),
         )
         await UPDATE_TIMES.set_prices(time)
         if old != data:
