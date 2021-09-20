@@ -31,7 +31,7 @@ async def fetch_cities():
                 }
                 for i in data["all_cities"]
             }
-            data = {key: tuple(value) for key, value in cities.items()}
+            data = {key: tuple(value.values()) for key, value in cities.items()}
             old = await execute_read_query("SELECT * FROM cities;")
             old = [dict(i) for i in old]
             old = {i["id"]: i for i in old}
