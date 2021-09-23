@@ -66,7 +66,7 @@ async def fetch_trades():
             await UPDATE_TIMES.set_completed_trades(time)
             if completed_dispatches:
                 await dispatch(
-                    "bulk_trade_completed", str(time), data=completed_dispatches
+                    "bulk_trade_complete", str(time), data=completed_dispatches
                 )
     except Exception as error:
         print("Ignoring exception in completed_trades:", file=sys.stderr)

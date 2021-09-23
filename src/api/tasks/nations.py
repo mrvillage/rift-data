@@ -135,9 +135,9 @@ async def fetch_nations():
                 data=updated_dispatches,
             )
         if created_dispatches:
-            await dispatch("bulk_nation_created", str(time), data=created_dispatches)
+            await dispatch("bulk_nation_create", str(time), data=created_dispatches)
         if deleted_dispatches:
-            await dispatch("bulk_nation_deleted", str(time), data=deleted_dispatches)
+            await dispatch("bulk_nation_delete", str(time), data=deleted_dispatches)
     except Exception as error:
         print("Ignoring exception in nations:", file=sys.stderr)
         traceback.print_exception(

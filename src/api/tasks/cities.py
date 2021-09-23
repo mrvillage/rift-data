@@ -81,9 +81,9 @@ async def fetch_cities():
                     data=updated_dispatches,
                 )
             if created_dispatches:
-                await dispatch("bulk_city_created", str(time), data=created_dispatches)
+                await dispatch("bulk_city_create", str(time), data=created_dispatches)
             if deleted_dispatches:
-                await dispatch("bulk_city_deleted", str(time), data=deleted_dispatches)
+                await dispatch("bulk_city_delete", str(time), data=deleted_dispatches)
     except Exception as error:
         print("Ignoring exception in cities:", file=sys.stderr)
         traceback.print_exception(

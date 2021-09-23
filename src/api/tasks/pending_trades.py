@@ -98,13 +98,13 @@ async def fetch_pending_trades():
                 )
             if created_dispatches:
                 await dispatch(
-                    "bulk_pending_trade_created",
+                    "bulk_pending_trade_create",
                     str(time),
                     data=created_dispatches,
                 )
             if removed_dispatches:
                 await dispatch(
-                    "bulk_pending_trade_removed", str(time), data=removed_dispatches
+                    "bulk_pending_trade_delete", str(time), data=removed_dispatches
                 )
     except Exception as error:
         print("Ignoring exception in pending_trades:", file=sys.stderr)

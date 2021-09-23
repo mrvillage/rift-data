@@ -374,9 +374,7 @@ async def fetch_wars():
         if attack_dispatches:
             await dispatch("bulk_attack", str(time), data=attack_dispatches)
         if declaration_dispatches:
-            await dispatch(
-                "bulk_war_declaration", str(time), data=declaration_dispatches
-            )
+            await dispatch("bulk_war_create", str(time), data=declaration_dispatches)
         if update_dispatches:
             await dispatch(
                 "bulk_war_update",

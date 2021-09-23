@@ -107,11 +107,11 @@ async def fetch_alliances():
                 )
             if created_dispatches:
                 await dispatch(
-                    "bulk_alliance_created", str(time), data=created_dispatches
+                    "bulk_alliance_create", str(time), data=created_dispatches
                 )
             if deleted_dispatches:
                 await dispatch(
-                    "bulk_alliance_deleted", str(time), data=deleted_dispatches
+                    "bulk_alliance_delete", str(time), data=deleted_dispatches
                 )
     except Exception as error:
         print("Ignoring exception in alliances:", file=sys.stderr)
