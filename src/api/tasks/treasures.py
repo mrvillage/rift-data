@@ -36,7 +36,6 @@ async def fetch_treasures():
             for i in data["data"]["treasures"]:
                 i["nation"] = i["nation"]["id"]
                 treasures.append(i)
-            treasures = dumps(treasures)
             old = await execute_read_query(
                 """
                 SELECT treasures FROM treasures
@@ -46,16 +45,14 @@ async def fetch_treasures():
             old = old[0]["treasures"]
             updated_dispatches = []
             if old != treasures:
-                updated_dispatches.append(
-                    {"before": loads(old), "after": loads(treasures)}
-                )
+                updated_dispatches.append({"before": old, "after": treasures})
             await execute_query(
                 """
                 INSERT INTO treasures (datetime, treasures)
                 VALUES ($1, $2);
                 """,
                 str(time),
-                treasures,
+                dumps(treasures),
             )
             await UPDATE_TIMES.set_treasures(time)
             if updated_dispatches:
@@ -69,13 +66,13 @@ async def fetch_treasures():
         )
 
 
-@fetch_treasures.before_loop
-async def before_loop():
-    now = datetime.utcnow()
-    wait = now.replace(minute=2, second=6)
-    while wait < now:
-        wait += timedelta(hours=1)
-    await sleep_until(wait)
+# @fetch_treasures.before_loop
+# async def before_loop():
+#     now = datetime.utcnow()
+#     wait = now.replace(minute=2, second=6)
+#     while wait < now:
+#         wait += timedelta(hours=1)
+#     await sleep_until(wait)
 
 
 fetch_treasures.add_exception_type(Exception)
