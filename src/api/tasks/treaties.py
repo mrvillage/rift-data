@@ -71,7 +71,8 @@ async def fetch_treaties():
                         "from_": treaty[2],
                         "to_": treaty[3],
                         "treaty_type": treaty[4],
-                    })
+                    }
+                )
                 new_treaties.append(treaty)
         expired_treaties = []
         expired_dispatches = []
@@ -104,7 +105,7 @@ async def fetch_treaties():
         )
         await UPDATE_TIMES.set_treaties(time)
         if new_dispatches:
-            await dispatch("bulk_treaty_create", new_dispatches[0][0], data=new_dispatches)
+            await dispatch("bulk_treaty_create", str(time), data=new_dispatches)
         if expired_dispatches:
             await dispatch("bulk_treaty_delete", str(time), data=expired_dispatches)
     except Exception as error:
