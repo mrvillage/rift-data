@@ -108,4 +108,4 @@ class SocketServer:
 
     async def send_all(self, data: dict[str, Any]) -> None:
         coros = [wrap_send(socket["socket"].send_json)(data) for socket in self.sockets]  # type: ignore
-        await asyncio.gather(*coros)
+        await asyncio.gather(*coros, return_exceptions=True)
