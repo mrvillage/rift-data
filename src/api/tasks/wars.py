@@ -283,7 +283,7 @@ async def fetch_wars():
                 "att_infra_destroyed_value": war[46],
                 "def_infra_destroyed_value": war[47],
             }
-            for war in data
+            for war in wars.values()
         }
         raw_attacks = {
             attack[0]: {
