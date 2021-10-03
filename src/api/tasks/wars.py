@@ -149,7 +149,6 @@ async def fetch_wars():
         data3 = data3["war_attacks"]
         # data4 = data4["data"]["wars"]
         # data3 = [*data3, *data4]
-        raw_wars = {int(war["id"]): war for war in data}
         wars = {
             int(war["id"]): (
                 int(war["id"]),
@@ -232,6 +231,59 @@ async def fetch_wars():
                 else None,
             )
             for attack in data3
+        }
+        raw_wars = {
+            war[0]: {
+                "id": war[0],
+                "date": war[1],
+                "reason": war[2],
+                "war_type": war[3],
+                "active": war[4],
+                "groundcontrol": war[5],
+                "airsuperiority": war[6],
+                "navalblockade": war[7],
+                "winner": war[8],
+                "turnsleft": war[9],
+                "attid": war[10],
+                "att_alliance_id": war[11],
+                "defid": war[12],
+                "def_alliance_id": war[13],
+                "attpoints": war[14],
+                "defpoints": war[15],
+                "attpeace": war[16],
+                "defpeace": war[17],
+                "att_resistance": war[18],
+                "def_resistance": war[19],
+                "att_fortify": war[20],
+                "def_fortify": war[21],
+                "att_gas_used": war[22],
+                "def_gas_used": war[23],
+                "att_mun_used": war[24],
+                "def_mun_used": war[25],
+                "att_alum_used": war[26],
+                "def_alum_used": war[27],
+                "att_steel_used": war[28],
+                "def_steel_used": war[29],
+                "att_infra_destroyed": war[30],
+                "def_infra_destroyed": war[31],
+                "att_money_looted": war[32],
+                "def_money_looted": war[33],
+                "att_soldiers_killed": war[34],
+                "def_soldiers_killed": war[35],
+                "att_tanks_killed": war[36],
+                "def_tanks_killed": war[37],
+                "att_aircraft_killed": war[38],
+                "def_aircraft_killed": war[39],
+                "att_ships_killed": war[40],
+                "def_ships_killed": war[41],
+                "att_missiles_used": war[42],
+                "def_missiles_used": war[43],
+                "att_nukes_used": war[44],
+                "def_nukes_used": war[45],
+                "att_infra_destroyed_value": war[46],
+                "def_infra_destroyed_value": war[47],
+            }
+            for war in data
         }
         raw_attacks = {
             attack[0]: {
