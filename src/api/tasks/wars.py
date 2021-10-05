@@ -307,8 +307,8 @@ async def fetch_wars():
                 "infra_destroyed_value": attack[17],
                 "attacker_munitions_used": attack[18],
                 "defender_munitions_used": attack[19],
-                "attacker_gas_used": attack[20],
-                "defender_gas_used": attack[21],
+                "attacker_gasoline_used": attack[20],
+                "defender_gasoline_used": attack[21],
                 "aircraft_killed_by_tanks": attack[22],
             }
             for attack in attacks.values()
@@ -345,8 +345,8 @@ async def fetch_wars():
             air_superiority, naval_blockade, winner, turns_left, attacker_id,
             attacker_alliance_id, defender_id, defender_alliance_id, attacker_points,
             defender_points, attacker_peace, defender_peace, attacker_resistance,
-            defender_resistance, attacker_fortify, defender_fortify, attacker_gas_used,
-            defender_gas_used, attacker_munitions_used, defender_munitions_used,
+            defender_resistance, attacker_fortify, defender_fortify, attacker_gasoline_used,
+            defender_gasoline_used, attacker_munitions_used, defender_munitions_used,
             attacker_aluminum_used, defender_aluminum_used, attacker_steel_used,
             defender_steel_used, attacker_infra_destroyed, defender_infra_destroyed,
             attacker_money_looted, defender_money_looted, attacker_soldiers_killed,
@@ -380,8 +380,8 @@ async def fetch_wars():
             defender_resistance = $20,
             attacker_fortify = $21,
             defender_fortify = $22,
-            attacker_gas_used = $23,
-            defender_gas_used = $24,
+            attacker_gasoline_used = $23,
+            defender_gasoline_used = $24,
             attacker_munitions_used = $25,
             defender_munitions_used = $26,
             attacker_aluminum_used = $27,
@@ -415,7 +415,7 @@ async def fetch_wars():
             defcas1, attcas2, defcas2, city_id, infra_destroyed, improvements_lost,
             money_stolen, loot_info, resistance_eliminated, city_infra_before,
             infra_destroyed_value, attacker_munitions_used, defender_munitions_used,
-            attacker_gas_used, defender_gas_used, aircraft_killed_by_tanks) VALUES
+            attacker_gasoline_used, defender_gasoline_used, aircraft_killed_by_tanks) VALUES
             ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
             $17, $18, $19, $20, $21, $22, $23)
             ON CONFLICT (id) DO NOTHING;
