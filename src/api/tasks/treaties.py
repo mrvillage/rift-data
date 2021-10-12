@@ -82,7 +82,7 @@ async def fetch_treaties():
                 expired_dispatches.append(
                     {
                         "started": treaty[0],
-                        "ended": treaty[1],
+                        "stopped": treaty[1],
                         "from_": treaty[2],
                         "to_": treaty[3],
                         "treaty_type": treaty[4],
