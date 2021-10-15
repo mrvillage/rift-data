@@ -69,7 +69,7 @@ async def fetch_trades():
                     "bulk_trade_complete", str(time), data=completed_dispatches
                 )
     except Exception as error:
-        print("Ignoring exception in completed_trades:", file=sys.stderr)
+        print("Ignoring exception in completed_trades:", file=sys.stderr, flush=True)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )

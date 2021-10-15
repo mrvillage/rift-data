@@ -434,7 +434,7 @@ async def fetch_wars():
                 data=update_dispatches,
             )
     except Exception as error:
-        print("Ignoring exception in wars:", file=sys.stderr)
+        print("Ignoring exception in wars:", file=sys.stderr, flush=True)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
@@ -446,7 +446,6 @@ async def before_loop():
     wait = now.replace(minute=0, second=8)
     while wait < now:
         wait += timedelta(minutes=2)
-    print("wait", "wars", wait)
     await sleep_until(wait)
 
 

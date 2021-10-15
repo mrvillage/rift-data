@@ -15,7 +15,7 @@ async def api_keep_alive():
         ) as req:
             pass
     except Exception as error:
-        print("Ignoring exception in api:", file=sys.stderr)
+        print("Ignoring exception in api:", file=sys.stderr, flush=True)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )

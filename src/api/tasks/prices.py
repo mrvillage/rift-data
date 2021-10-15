@@ -79,7 +79,7 @@ async def fetch_prices():
         if old != data:
             await dispatch("prices_update", str(time), before=old, after=data)
     except Exception as error:
-        print("Ignoring exception in prices:", file=sys.stderr)
+        print("Ignoring exception in prices:", file=sys.stderr, flush=True)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )

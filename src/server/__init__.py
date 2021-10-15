@@ -54,6 +54,7 @@ class SocketServer:
         async for message in websocket:
             try:
                 request: dict = message.json()
+                print("request received", request, flush=True)
                 endpoint = request.get("endpoint")
                 code = request.get("code")
                 if not code or code != self.auth_code:
@@ -82,7 +83,9 @@ class SocketServer:
                 for sock in self.sockets:
                     if sock["socket"] is websocket:
                         self.sockets.remove(sock)
-                print("Ignoring exception in prices:", file=sys.stderr)
+                print(
+                    "Ignoring exception in socket-server:", file=sys.stderr, flush=True
+                )
                 traceback.print_exception(
                     type(error), error, error.__traceback__, file=sys.stderr
                 )
@@ -100,6 +103,7 @@ class SocketServer:
             # ssl_context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH),
         )
         await self.site.start()
+        print("socket-server started", flush=True)
 
     def start(self) -> None:
         self.server = web.Application()
@@ -108,4 +112,5 @@ class SocketServer:
 
     async def send_all(self, data: dict[str, Any]) -> None:
         coros = [wrap_send(socket["socket"].send_json)(data) for socket in self.sockets]  # type: ignore
+        print("sending", data["event"], flush=True)
         await asyncio.gather(*coros, return_exceptions=True)

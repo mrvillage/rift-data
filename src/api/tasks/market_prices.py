@@ -60,7 +60,7 @@ async def fetch_market_prices():
                     "market_prices_update", str(time), before=old, after=data
                 )
     except Exception as error:
-        print("Ignoring exception in market_prices:", file=sys.stderr)
+        print("Ignoring exception in market_prices:", file=sys.stderr, flush=True)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )

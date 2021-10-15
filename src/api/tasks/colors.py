@@ -48,7 +48,7 @@ async def fetch_colors():
                     after=colors,
                 )
     except Exception as error:
-        print("Ignoring exception in colors:", file=sys.stderr)
+        print("Ignoring exception in colors:", file=sys.stderr, flush=True)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )

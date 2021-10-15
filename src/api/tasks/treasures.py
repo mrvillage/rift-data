@@ -60,7 +60,7 @@ async def fetch_treasures():
                     "bulk_treasures_update", str(time), data=updated_dispatches
                 )
     except Exception as error:
-        print("Ignoring exception in treasures:", file=sys.stderr)
+        print("Ignoring exception in treasures:", file=sys.stderr, flush=True)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
