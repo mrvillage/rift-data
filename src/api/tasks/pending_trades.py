@@ -32,19 +32,18 @@ async def fetch_pending_trades():
         """
         async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
             data = await response.json()
-            raw_trades = {int(i["id"]): i for i in data["data"]["trades"]}
             data = {
-                int(i["id"]): (
-                    int(i["id"]),
-                    i["date"],
-                    int(i["sid"]),
-                    int(i["rid"]),
-                    i["offer_resource"],
-                    int(i["offer_amount"]),
-                    i["buy_or_sell"],
-                    int(i["total"]),
-                    i["date_accepted"],
-                )
+                int(i["id"]): {
+                    "id": int(i["id"]),
+                    "date": i["date"],
+                    "sid": int(i["sid"]),
+                    "rid": int(i["rid"]),
+                    "offer_resource": i["offer_resource"],
+                    "offer_amount": int(i["offer_amount"]),
+                    "buy_or_sell": i["buy_or_sell"],
+                    "total": int(i["total"]),
+                    "date_accepted": i["date_accepted"],
+                }
                 for i in data["data"]["trades"]
             }
             old = await execute_read_query("SELECT * FROM pending_trades;")
@@ -55,17 +54,16 @@ async def fetch_pending_trades():
             created_dispatches = []
             for after in data.values():
                 try:
-                    before = tuple(old[after[0]].values())
+                    before = dict(old[after["id"]])
                     if before != after:
                         updated_dispatches.append(
-                            {"before": old[after[0]], "after": raw_trades[after[0]]}
+                            {"before": old[after["id"]], "after": data[after["id"]]}
                         )
-
-                        update[after[0]] = after
-                    del old[after[0]]
+                        update[after["id"]] = after
+                    del old[after["id"]]
                 except KeyError:
-                    created_dispatches.append(raw_trades[after[0]])
-                    update[after[0]] = after
+                    created_dispatches.append(data[after["id"]])
+                    update[after["id"]] = after
             removed_dispatches = []
             for removed in old.values():
                 removed_dispatches.append(removed)
@@ -87,7 +85,7 @@ async def fetch_pending_trades():
                 total = $8,
                 accepted = $9;
             """,
-                update.values(),
+                [tuple(i.values()) for i in update.values()],
             )
             await UPDATE_TIMES.set_pending_trades(time)
             if updated_dispatches:

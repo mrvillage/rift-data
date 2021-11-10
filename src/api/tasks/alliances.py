@@ -1,6 +1,7 @@
 import sys
 import traceback
 from datetime import datetime, timedelta
+from typing import Any, Dict, List
 
 import aiohttp
 from discord.ext import tasks
@@ -19,7 +20,7 @@ async def fetch_alliances():
             "GET", f"{BASEURL}/alliances/?key={APIKEY}"
         ) as response:
             data = await response.json()
-            alliances = {
+            data = {
                 int(i["id"]): {
                     "id": int(i["id"]),
                     "found_date": i["founddate"],
@@ -45,10 +46,9 @@ async def fetch_alliances():
                 }
                 for i in data["alliances"]
             }
-            data = {key: tuple(value.values()) for key, value in alliances.items()}
             old = await execute_read_query("SELECT * FROM alliances;")
             old = [dict(i) for i in old]
-            old = {i["id"]: i for i in old}
+            old: List[Dict[int, Dict[str, Any]]] = {i["id"]: i for i in old}  # type: ignore
             update = {}
             for i in old.values():
                 i["score"] = round(i["score"], 2) if i["score"] is not None else None
@@ -57,16 +57,16 @@ async def fetch_alliances():
             created_dispatches = []
             for after in data.values():
                 try:
-                    before = tuple(old[after[0]].values())
+                    before = dict(old[after["id"]])
                     if before != after:
                         updated_dispatches.append(
-                            {"before": old[after[0]], "after": alliances[after[0]]}
+                            {"before": old[after["id"]], "after": data[after["id"]]}
                         )
-                        update[after[0]] = after
-                    del old[after[0]]
+                        update[after["id"]] = after
+                    del old[after["id"]]
                 except KeyError:
-                    created_dispatches.append(alliances[after[0]])
-                    update[after[0]] = after
+                    created_dispatches.append(data[after["id"]])
+                    update[after["id"]] = after
             deleted_dispatches = []
             for deleted in old.values():
                 deleted_dispatches.append(deleted)
@@ -96,7 +96,7 @@ async def fetch_alliances():
                 forum_url = $14,
                 ircchan = $15;
             """,
-                update.values(),
+                [tuple(i.values()) for i in update.values()],
             )
             await UPDATE_TIMES.set_alliances(time)
             if updated_dispatches:

@@ -142,203 +142,127 @@ async def fetch_wars():
             0
         ][0]
         time = datetime.utcnow()
-        data, data3 = await asyncio.gather(request(), request3(min_war_attack_id))
-        data = data["data"]["wars"]
+        wars, attacks = await asyncio.gather(request(), request3(min_war_attack_id))
+        wars = wars["data"]["wars"]
         # data2 = data2["data"]["wars"]
         # data = [*data, *data2]
-        data3 = data3["war_attacks"]
+        attacks = attacks["war_attacks"]
         # data4 = data4["data"]["wars"]
         # data3 = [*data3, *data4]
         wars = {
-            int(war["id"]): (
-                int(war["id"]),
-                war["date"],
-                war["reason"],
-                war["war_type"],
-                True,
-                int(war["groundcontrol"]),
-                int(war["airsuperiority"]),
-                int(war["navalblockade"]),
-                int(war["winner"]),
-                int(war["turnsleft"]),
-                int(war["attid"]),
-                int(war["att_alliance_id"]),
-                int(war["defid"]),
-                int(war["def_alliance_id"]),
-                int(war["attpoints"]),
-                int(war["defpoints"]),
-                war["attpeace"],
-                war["defpeace"],
-                int(war["att_resistance"]),
-                int(war["def_resistance"]),
-                war["att_fortify"],
-                war["def_fortify"],
-                float(war["att_gas_used"]),
-                float(war["def_gas_used"]),
-                float(war["att_mun_used"]),
-                float(war["def_mun_used"]),
-                int(war["att_alum_used"]),
-                int(war["def_alum_used"]),
-                int(war["att_steel_used"]),
-                int(war["def_steel_used"]),
-                float(war["att_infra_destroyed"]),
-                float(war["def_infra_destroyed"]),
-                float(war["att_money_looted"]),
-                float(war["def_money_looted"]),
-                int(war["att_soldiers_killed"]),
-                int(war["def_soldiers_killed"]),
-                int(war["att_tanks_killed"]),
-                int(war["def_tanks_killed"]),
-                int(war["att_aircraft_killed"]),
-                int(war["def_aircraft_killed"]),
-                int(war["att_ships_killed"]),
-                int(war["def_ships_killed"]),
-                int(war["att_missiles_used"]),
-                int(war["def_missiles_used"]),
-                int(war["att_nukes_used"]),
-                int(war["def_nukes_used"]),
-                float(war["att_infra_destroyed_value"]),
-                float(war["def_infra_destroyed_value"]),
-            )
-            for war in data
+            int(war["id"]): {
+                "id": int(war["id"]),
+                "date": war["date"],
+                "reason": war["reason"],
+                "war_type": war["war_type"],
+                "active": True,
+                "ground_control": int(war["groundcontrol"]),
+                "air_superiority": int(war["airsuperiority"]),
+                "naval_blockade": int(war["navalblockade"]),
+                "winner": int(war["winner"]),
+                "turns_left": int(war["turnsleft"]),
+                "attacker_id": int(war["attid"]),
+                "attacker_alliance_id": int(war["att_alliance_id"]),
+                "defender_id": int(war["defid"]),
+                "defender_alliance_id": int(war["def_alliance_id"]),
+                "attacker_points": int(war["attpoints"]),
+                "defender_points": int(war["defpoints"]),
+                "attacker_peace": war["attpeace"],
+                "defender_peace": war["defpeace"],
+                "attacker_resistance": int(war["att_resistance"]),
+                "defender_resistance": int(war["def_resistance"]),
+                "attacker_fortify": war["att_fortify"],
+                "defender_fortify": war["def_fortify"],
+                "attacker_gasoline_used": float(war["att_gas_used"]),
+                "defender_gasoline_used": float(war["def_gas_used"]),
+                "attacker_munitions_used": float(war["att_mun_used"]),
+                "defender_munitions_used": float(war["def_mun_used"]),
+                "attacker_aluminum_used": int(war["att_alum_used"]),
+                "defender_aluminum_used": int(war["def_alum_used"]),
+                "attacker_steel_used": int(war["att_steel_used"]),
+                "defender_steel_used": int(war["def_steel_used"]),
+                "attacker_infra_destroyed": float(war["att_infra_destroyed"]),
+                "defender_infra_destroyed": float(war["def_infra_destroyed"]),
+                "attacker_money_looted": float(war["att_money_looted"]),
+                "defender_money_looted": float(war["def_money_looted"]),
+                "attacker_soldiers_killed": int(war["att_soldiers_killed"]),
+                "defender_soldiers_killed": int(war["def_soldiers_killed"]),
+                "attacker_tanks_killed": int(war["att_tanks_killed"]),
+                "defender_tanks_killed": int(war["def_tanks_killed"]),
+                "attacker_aircraft_killed": int(war["att_aircraft_killed"]),
+                "defender_aircraft_killed": int(war["def_aircraft_killed"]),
+                "attacker_ships_killed": int(war["att_ships_killed"]),
+                "defender_ships_killed": int(war["def_ships_killed"]),
+                "attacker_missiles_used": int(war["att_missiles_used"]),
+                "defender_missiles_used": int(war["def_missiles_used"]),
+                "attacker_nukes_used": int(war["att_nukes_used"]),
+                "defender_nukes_used": int(war["def_nukes_used"]),
+                "attacker_infra_destroyed_value": float(
+                    war["att_infra_destroyed_value"]
+                ),
+                "defender_infra_destroyed_value": float(
+                    war["def_infra_destroyed_value"]
+                ),
+            }
+            for war in wars
         }
         attacks = {
-            int(attack["war_attack_id"]): (
-                int(attack["war_attack_id"]),
-                int(attack["war_id"]),
-                attack["date"],
-                attack["attack_type"],
-                int(attack["victor"]),
-                int(attack["success"]),
-                int(attack["attcas1"]),
-                int(attack["defcas1"]),
-                int(attack["attcas2"]),
-                int(attack["defcas2"]),
-                int(attack["city_id"]),
-                float(attack["infra_destroyed"]),
-                int(attack["improvements_destroyed"]),
-                float(attack["money_looted"]),
-                attack["note"] if not attack["note"].isdigit() else None,
-                int(attack["note"]) if attack["note"].isdigit() else None,
-                float(attack["city_infra_before"]),
-                float(attack["infra_destroyed_value"]),
-                float(attack["att_mun_used"]),
-                float(attack["def_mun_used"]),
-                float(attack["att_gas_used"]),
-                float(attack["def_gas_used"]),
-                int(attack["aircraft_killed_by_tanks"])
+            int(attack["war_attack_id"]): {
+                "id": int(attack["war_attack_id"]),
+                "war_id": int(attack["war_id"]),
+                "date": attack["date"],
+                "attack_type": attack["attack_type"],
+                "victor": int(attack["victor"]),
+                "success": int(attack["success"]),
+                "attcas1": int(attack["attcas1"]),
+                "defcas1": int(attack["defcas1"]),
+                "attcas2": int(attack["attcas2"]),
+                "defcas2": int(attack["defcas2"]),
+                "city_id": int(attack["city_id"]),
+                "infra_destroyed": float(attack["infra_destroyed"]),
+                "improvements_destroyed": int(attack["improvements_destroyed"]),
+                "money_looted": float(attack["money_looted"]),
+                "loot_info": attack["note"] if not attack["note"].isdigit() else None,
+                "resistance_eliminated": int(attack["note"])
+                if attack["note"].isdigit()
+                else None,
+                "city_infra_before": float(attack["city_infra_before"]),
+                "infra_destroyed_value": float(attack["infra_destroyed_value"]),
+                "attacker_munitions_used": float(attack["att_mun_used"]),
+                "defender_munitions_used": float(attack["def_mun_used"]),
+                "attacker_gasoline_used": float(attack["att_gas_used"]),
+                "defender_gasoline_used": float(attack["def_gas_used"]),
+                "aicraft_killed_by_tanks": int(attack["aircraft_killed_by_tanks"])
                 if attack["aircraft_killed_by_tanks"] is not None
                 else None,
-            )
-            for attack in data3
-        }
-        raw_wars = {
-            war[0]: {
-                "id": war[0],
-                "date": war[1],
-                "reason": war[2],
-                "war_type": war[3],
-                "active": war[4],
-                "ground_control": war[5],
-                "air_superiority": war[6],
-                "naval_blockade": war[7],
-                "winner": war[8],
-                "turns_left": war[9],
-                "attacker_id": war[10],
-                "attacker_alliance_id": war[11],
-                "defender_id": war[12],
-                "defender_alliance_id": war[13],
-                "attacker_points": war[14],
-                "defender_points": war[15],
-                "attacker_peace": war[16],
-                "defender_peace": war[17],
-                "attacker_resistance": war[18],
-                "defender_resistance": war[19],
-                "attacker_fortify": war[20],
-                "defender_fortify": war[21],
-                "attacker_gasoline_used": war[22],
-                "defender_gasoline_used": war[23],
-                "attacker_munitions_used": war[24],
-                "defender_munitions_used": war[25],
-                "attacker_aluminum_used": war[26],
-                "defender_aluminum_used": war[27],
-                "attacker_steel_used": war[28],
-                "defender_steel_used": war[29],
-                "attacker_infra_destroyed": war[30],
-                "defender_infra_destroyed": war[31],
-                "attacker_money_looted": war[32],
-                "defender_money_looted": war[33],
-                "attacker_soldiers_killed": war[34],
-                "defender_soldiers_killed": war[35],
-                "attacker_tanks_killed": war[36],
-                "defender_tanks_killed": war[37],
-                "attacker_aircraft_killed": war[38],
-                "defender_aircraft_killed": war[39],
-                "attacker_ships_killed": war[40],
-                "defender_ships_killed": war[41],
-                "attacker_missiles_used": war[42],
-                "defender_missiles_used": war[43],
-                "attacker_nukes_used": war[44],
-                "defender_nukes_used": war[45],
-                "attacker_infra_destroyed_value": war[46],
-                "defender_infra_destroyed_value": war[47],
             }
-            for war in wars.values()
+            for attack in attacks
         }
-        raw_attacks = {
-            attack[0]: {
-                "id": attack[0],
-                "war_id": attack[1],
-                "date": attack[2],
-                "type": attack[3],
-                "victor": attack[4],
-                "success": attack[5],
-                "attcas1": attack[6],
-                "defcas1": attack[7],
-                "attcas2": attack[8],
-                "defcas2": attack[9],
-                "city_id": attack[10],
-                "infra_destroyed": attack[11],
-                "improvements_lost": attack[12],
-                "money_stolen": attack[13],
-                "loot_info": attack[14],
-                "resistance_eliminated": attack[15],
-                "city_infra_before": attack[16],
-                "infra_destroyed_value": attack[17],
-                "attacker_munitions_used": attack[18],
-                "defender_munitions_used": attack[19],
-                "attacker_gasoline_used": attack[20],
-                "defender_gasoline_used": attack[21],
-                "aircraft_killed_by_tanks": attack[22],
-            }
-            for attack in attacks.values()
-        }
-        old_attacks = await execute_read_query("SELECT id FROM attacks;")
-        old_attacks = [i["id"] for i in old_attacks]
         attack_data = {}
         war_data = {}
-        old_wars = await execute_read_query("SELECT * FROM wars;")
+        old_wars = await execute_read_query(
+            "SELECT * FROM wars WHERE id >= $1;", min(wars)
+        )
         old_wars = [dict(i) for i in old_wars]
         old_wars = {i["id"]: i for i in old_wars}
         attack_dispatches = []
         for attack in attacks.values():
-            if attack[0] not in old_attacks:
-                attack_dispatches.append(raw_attacks[attack[0]])
-                attack_data[attack[0]] = attack
+            attack_dispatches.append(attacks[attack["id"]])
+            attack_data[attack["id"]] = attack
         declaration_dispatches = []
-        update_dispatches = []
+        updated_dispatches = []
         for after in wars.values():
             try:
-                before = tuple(old_wars[after[0]])
+                before = dict(old_wars[after["id"]])
+                if before != after:
+                    updated_dispatches.append(
+                        {"before": old_wars[after["id"]], "after": wars[after["id"]]}
+                    )
+                    war_data[after["id"]] = after
+                del old_wars[after["id"]]
             except KeyError:
-                declaration_dispatches.append(raw_wars[after[0]])
-                war_data[after[0]] = after
-                continue
-            if before != after:
-                update_dispatches.append(
-                    {"before": old_wars[after[0]], "after": raw_wars[after[0]]}
-                )
-                war_data[after[0]] = after
+                declaration_dispatches.append(wars[after["id"]])
+                war_data[after["id"]] = after
         await execute_query_many(
             """
             INSERT INTO wars (id, date, reason, war_type, active, ground_control,
@@ -407,7 +331,7 @@ async def fetch_wars():
             attacker_infra_destroyed_value = $47,
             defender_infra_destroyed_value = $48;
         """,
-            war_data.values(),
+            [tuple(i.values()) for i in war_data.values()],
         )
         await execute_query_many(
             """
@@ -420,18 +344,18 @@ async def fetch_wars():
             $17, $18, $19, $20, $21, $22, $23)
             ON CONFLICT (id) DO NOTHING;
         """,
-            attack_data.values(),
+            [tuple(i.values()) for i in attack_data.values()],
         )
         await UPDATE_TIMES.set_wars(time)
         if attack_dispatches:
             await dispatch("bulk_attack", str(time), data=attack_dispatches)
         if declaration_dispatches:
             await dispatch("bulk_war_create", str(time), data=declaration_dispatches)
-        if update_dispatches:
+        if updated_dispatches:
             await dispatch(
                 "bulk_war_update",
                 str(time),
-                data=update_dispatches,
+                data=updated_dispatches,
             )
     except Exception as error:
         print("Ignoring exception in wars:", file=sys.stderr, flush=True)

@@ -32,36 +32,36 @@ async def fetch_trades():
         """
         async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
             data = await response.json()
-            raw_trades = {int(i["id"]): i for i in data["data"]["trades"]}
             data = {
-                int(i["id"]): (
-                    int(i["id"]),
-                    i["date"],
-                    int(i["sid"]),
-                    int(i["rid"]),
-                    i["offer_resource"],
-                    int(i["offer_amount"]),
-                    i["buy_or_sell"],
-                    int(i["total"]),
-                    i["date_accepted"],
-                )
+                int(i["id"]): {
+                    "id": int(i["id"]),
+                    "date": i["date"],
+                    "sid": int(i["sid"]),
+                    "rid": int(i["rid"]),
+                    "offer_resource": i["offer_resource"],
+                    "offer_amount": int(i["offer_amount"]),
+                    "buy_or_sell": i["buy_or_sell"],
+                    "total": int(i["total"]),
+                    "date_accepted": i["date_accepted"],
+                }
                 for i in data["data"]["trades"]
             }
             old = await execute_read_query("SELECT id FROM completed_trades;")
-            old = [i["id"] for i in old]
+            old = [dict(i) for i in old]
+            old: List[Dict[int, Dict[str, Any]]] = {i["id"]: i for i in old}  # type: ignore
             update = {}
             completed_dispatches = []
             for trade in data.values():
-                if trade[0] not in old:
-                    completed_dispatches.append(raw_trades[trade[0]])
-                    update[trade[0]] = trade
+                if trade["id"] not in old:
+                    completed_dispatches.append(data[trade["id"]])
+                    update[trade["id"]] = trade
             await execute_query_many(
                 """
                 INSERT INTO completed_trades (id, date, sender, receiver, offer_resource,
                 offer_amount, buy_or_sell, total, accepted) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 ON CONFLICT (id) DO NOTHING;
             """,
-                update.values(),
+                [tuple(i.values()) for i in update.values()],
             )
             await UPDATE_TIMES.set_completed_trades(time)
             if completed_dispatches:

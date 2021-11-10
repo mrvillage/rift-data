@@ -34,7 +34,7 @@ async def fetch_treasures():
             data = await response.json()
             treasures = []
             for i in data["data"]["treasures"]:
-                i["nation"] = i["nation"]["id"]
+                i["nation"] = i["nation"] and i["nation"]["id"]
                 treasures.append(i)
             old = await execute_read_query(
                 """
@@ -66,13 +66,13 @@ async def fetch_treasures():
         )
 
 
-# @fetch_treasures.before_loop
-# async def before_loop():
-#     now = datetime.utcnow()
-#     wait = now.replace(minute=2, second=6)
-#     while wait < now:
-#         wait += timedelta(hours=1)
-#     await sleep_until(wait)
+@fetch_treasures.before_loop
+async def before_loop():
+    now = datetime.utcnow()
+    wait = now.replace(minute=2, second=6)
+    while wait < now:
+        wait += timedelta(hours=1)
+    await sleep_until(wait)
 
 
 fetch_treasures.add_exception_type(Exception)

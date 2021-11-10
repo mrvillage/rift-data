@@ -44,7 +44,7 @@ class SocketServer:
         return decorator
 
     async def socket_handler(self, req: BaseRequest) -> None:
-        websocket = web.WebSocketResponse(max_msg_size=0, timeout=300)
+        websocket = web.WebSocketResponse(max_msg_size=0, timeout=60)
         await websocket.prepare(req)
         self.sockets.append(
             {

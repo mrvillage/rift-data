@@ -19,7 +19,7 @@ async def fetch_cities():
             "GET", f"{BASEURL}/all-cities/key={APIKEY}"
         ) as response:
             data = await response.json()
-            cities = {
+            data = {
                 int(i["city_id"]): {
                     "id": int(i["city_id"]),
                     "nation_id": int(i["nation_id"]),
@@ -31,7 +31,6 @@ async def fetch_cities():
                 }
                 for i in data["all_cities"]
             }
-            data = {key: tuple(value.values()) for key, value in cities.items()}
             old = await execute_read_query("SELECT * FROM cities;")
             old = [dict(i) for i in old]
             old = {i["id"]: i for i in old}
@@ -44,16 +43,16 @@ async def fetch_cities():
             created_dispatches = []
             for after in data.values():
                 try:
-                    before = tuple(old[after[0]].values())
+                    before = dict(old[after["id"]])
                     if before != after:
                         updated_dispatches.append(
-                            {"before": old[after[0]], "after": cities[after[0]]}
+                            {"before": old[after["id"]], "after": data[after["id"]]}
                         )
-                        update[after[0]] = after
-                    del old[after[0]]
+                        update[after["id"]] = after
+                    del old[after["id"]]
                 except KeyError:
-                    created_dispatches.append(cities[after[0]])
-                    update[after[0]] = after
+                    created_dispatches.append(data[after["id"]])
+                    update[after["id"]] = after
             deleted_dispatches = []
             for deleted in old.values():
                 deleted_dispatches.append(deleted)
@@ -71,7 +70,7 @@ async def fetch_cities():
                 max_infra = $6,
                 land = $7;
             """,
-                update.values(),
+                [tuple(i.values()) for i in update.values()],
             )
             await UPDATE_TIMES.set_cities(time)
             if updated_dispatches:
