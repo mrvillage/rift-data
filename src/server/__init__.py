@@ -44,15 +44,15 @@ class SocketServer:
         return decorator
 
     async def socket_handler(self, req: BaseRequest) -> None:
-        websocket = web.WebSocketResponse(max_msg_size=0, timeout=60)
-        await websocket.prepare(req)
-        self.sockets.append(
-            {
-                "socket": websocket,
-            }
-        )
-        async for message in websocket:
-            try:
+        try:
+            websocket = web.WebSocketResponse(max_msg_size=0, timeout=60)
+            await websocket.prepare(req)
+            self.sockets.append(
+                {
+                    "socket": websocket,
+                }
+            )
+            async for message in websocket:
                 request: dict = message.json()
                 print("request received", request, flush=True)
                 endpoint = request.get("endpoint")
@@ -79,17 +79,18 @@ class SocketServer:
                 except Exception as error:
                     response = {"success": False, "error": str(error)}
                     await websocket.send_json(response)
-            except Exception as error:
+        except Exception as error:
+            try:
                 for sock in self.sockets:
                     if sock["socket"] is websocket:
                         self.sockets.remove(sock)
-                print(
-                    "Ignoring exception in socket-server:", file=sys.stderr, flush=True
-                )
-                traceback.print_exception(
-                    type(error), error, error.__traceback__, file=sys.stderr
-                )
-                return
+            except NameError:
+                pass
+            print("Ignoring exception in socket-server:", file=sys.stderr, flush=True)
+            traceback.print_exception(
+                type(error), error, error.__traceback__, file=sys.stderr
+            )
+            return
 
     async def start_coro(self) -> None:
         if TYPE_CHECKING:
