@@ -89,7 +89,8 @@ async def fetch_nations():
             try:
                 await execute_query("DELETE FROM nations WHERE id = $1;", deleted["id"])
             except Exception:
-                pass
+                await execute_query("DELETE FROM users WHERE nation_id = $1;", deleted["id"])
+                await execute_query("DELETE FROM nations WHERE id = $1;", deleted["id"])
         await execute_query_many(
             """
             INSERT INTO nations (id, name, leader, continent, war_policy,
