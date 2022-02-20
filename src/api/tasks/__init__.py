@@ -1,12 +1,8 @@
-from . import (
+from . import (  # api,; completed_trades,; market_prices,; pending_trades,
     alliances,
-    # api,
     cities,
     colors,
-    completed_trades,
-    #    market_prices,
     nations,
-    pending_trades,
     prices,
     treasures,
     treaties,

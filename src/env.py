@@ -1,10 +1,13 @@
 __version__ = "Alpha 3.1.0"
 
+import os
 from asyncio import get_event_loop
 from datetime import datetime
-import os
 from typing import TYPE_CHECKING
+
+import pnwkit
 from dotenv import load_dotenv
+
 from .server import SocketServer
 
 load_dotenv()
@@ -25,6 +28,8 @@ DB_PASSWORD = os.getenv("db_password")
 DB_NAME = os.getenv("db_name")
 AUTH_CODE = os.getenv("auth_code")
 SOCKET_PORT = os.getenv("socket_port")
+
+pnwkit.set_key(APIKEY)
 
 if TYPE_CHECKING:
     assert isinstance(AUTH_CODE, str)

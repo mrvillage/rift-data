@@ -4,6 +4,7 @@ import traceback
 from datetime import datetime, timedelta
 
 import aiohttp
+import pnwkit
 from discord.ext import tasks
 from discord.utils import sleep_until
 
@@ -12,57 +13,53 @@ from ...env import APIKEY, GQL_URL, UPDATE_TIMES
 from ...events import dispatch
 
 query = """
-    {
-        wars(active: false, days_ago: 7) {
-            id
-            date
-            reason
-            war_type
-            groundcontrol
-            airsuperiority
-            navalblockade
-            winner
-            turnsleft
-            attid
-            att_alliance_id
-            defid
-            def_alliance_id
-            attpoints
-            defpoints
-            attpeace
-            defpeace
-            att_resistance
-            def_resistance
-            att_fortify
-            def_fortify
-            att_gas_used
-            def_gas_used
-            att_mun_used
-            def_mun_used
-            att_alum_used
-            def_alum_used
-            att_steel_used
-            def_steel_used
-            att_infra_destroyed
-            def_infra_destroyed
-            att_money_looted
-            def_money_looted
-            att_soldiers_killed
-            def_soldiers_killed
-            att_tanks_killed
-            def_tanks_killed
-            att_aircraft_killed
-            def_aircraft_killed
-            att_ships_killed
-            def_ships_killed
-            att_missiles_used
-            def_missiles_used
-            att_nukes_used
-            def_nukes_used
-            att_infra_destroyed_value
-            def_infra_destroyed_value
-        }
-    }
+    id
+    date
+    reason
+    war_type
+    groundcontrol
+    airsuperiority
+    navalblockade
+    winner
+    turnsleft
+    attid
+    att_alliance_id
+    defid
+    def_alliance_id
+    attpoints
+    defpoints
+    attpeace
+    defpeace
+    att_resistance
+    def_resistance
+    att_fortify
+    def_fortify
+    att_gas_used
+    def_gas_used
+    att_mun_used
+    def_mun_used
+    att_alum_used
+    def_alum_used
+    att_steel_used
+    def_steel_used
+    att_infra_destroyed
+    def_infra_destroyed
+    att_money_looted
+    def_money_looted
+    att_soldiers_killed
+    def_soldiers_killed
+    att_tanks_killed
+    def_tanks_killed
+    att_aircraft_killed
+    def_aircraft_killed
+    att_ships_killed
+    def_ships_killed
+    att_missiles_used
+    def_missiles_used
+    att_nukes_used
+    def_nukes_used
+    att_infra_destroyed_value
+    def_infra_destroyed_value
 """
 attack_query = """
     {
@@ -141,9 +138,14 @@ async def fetch_wars():
         min_war_attack_id = (await execute_read_query("SELECT max(id) FROM attacks;"))[
             0
         ][0]
+        min_war_id = (
+            await execute_read_query(
+                "SELECT max(id) FROM wars WHERE date >= $1;",
+                str(datetime.utcnow() - timedelta(days=7)),
+            )
+        )[0][0]
         time = datetime.utcnow()
-        wars, attacks = await asyncio.gather(request(), request3(min_war_attack_id))
-        wars = wars["data"]["wars"]
+        attacks = await request3(min_war_attack_id)
         # data2 = data2["data"]["wars"]
         # data = [*data, *data2]
         attacks = attacks["war_attacks"]
@@ -204,7 +206,9 @@ async def fetch_wars():
                     war["def_infra_destroyed_value"]
                 ),
             }
-            for war in wars
+            async for war in pnwkit.async_war_query(
+                {"min_id": min_war_id}, query, paginator=True
+            ).batch(5)
         }
         attacks = {
             int(attack["war_attack_id"]): {
