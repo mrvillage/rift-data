@@ -30,7 +30,7 @@ async def fetch_treasures():
                 }
             }
         """
-        async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
+        async with aiohttp.request("POST", GQL_URL, json={"query": query}) as response:
             data = await response.json()
             treasures = []
             for i in data["data"]["treasures"]:

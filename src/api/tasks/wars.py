@@ -94,13 +94,13 @@ attack_query = """
 
 
 async def request():
-    async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
+    async with aiohttp.request("POST", GQL_URL, json={"query": query}) as response:
         return await response.json()
 
 
 async def request2():
     async with aiohttp.request(
-        "GET",
+        "POST",
         GQL_URL,
         json={
             "query": query.replace(
@@ -121,7 +121,7 @@ async def request3(min_war_attack_id):
 
 async def request4():
     async with aiohttp.request(
-        "GET",
+        "POST",
         GQL_URL,
         json={
             "query": attack_query.replace(

@@ -24,7 +24,7 @@ async def fetch_colors():
                 }
             }
         """
-        async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
+        async with aiohttp.request("POST", GQL_URL, json={"query": query}) as response:
             data = await response.json()
             colors = data["data"]["colors"]
             old = await execute_read_query(

@@ -30,7 +30,7 @@ async def fetch_trades():
                 }
             }
         """
-        async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
+        async with aiohttp.request("POST", GQL_URL, json={"query": query}) as response:
             data = await response.json()
             data = {
                 int(i["id"]): {

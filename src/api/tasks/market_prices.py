@@ -33,7 +33,7 @@ async def fetch_market_prices():
                 }
             }
         """
-        async with aiohttp.request("GET", GQL_URL, json={"query": query}) as response:
+        async with aiohttp.request("POST", GQL_URL, json={"query": query}) as response:
             data = await response.json()
             data = data["data"]["tradeprices"][0]
             old = await execute_read_query(
