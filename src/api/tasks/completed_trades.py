@@ -46,7 +46,9 @@ async def fetch_trades():
                 }
                 for i in data["data"]["trades"]
             }
-            old = await execute_read_query("SELECT id FROM completed_trades;")
+            old = await execute_read_query(
+                "SELECT id FROM completed_trades WHERE id > $1;", min(list(data))
+            )
             old = [dict(i) for i in old]
             old: List[Dict[int, Dict[str, Any]]] = {i["id"]: i for i in old}  # type: ignore
             update = {}
