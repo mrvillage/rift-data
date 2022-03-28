@@ -140,7 +140,7 @@ async def fetch_wars():
         ][0]
         min_war_id = (
             await execute_read_query(
-                "SELECT max(id) FROM wars WHERE date >= $1;",
+                "SELECT min(id) FROM wars WHERE date >= $1;",
                 str(datetime.utcnow() - timedelta(days=7)),
             )
         )[0][0]
