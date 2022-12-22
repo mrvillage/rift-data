@@ -44,6 +44,7 @@ class SocketServer:
         return decorator
 
     async def socket_handler(self, req: BaseRequest) -> None:
+        print("request received", flush=True)
         try:
             websocket = web.WebSocketResponse(max_msg_size=0, timeout=60)
             await websocket.prepare(req)
