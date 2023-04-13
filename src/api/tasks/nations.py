@@ -14,7 +14,7 @@ from ...events import dispatch
 
 async def city_one():
     async with aiohttp.request(
-        "GET", f"{BASEURL}/v2/nations/{APIKEY}/&cities=1"
+        "GET", f"{BASEURL}/v2/nations/{APIKEY}/&max_cities=2"
     ) as response:
         data = await response.json()
         return data["data"]
@@ -22,7 +22,7 @@ async def city_one():
 
 async def city_two():
     async with aiohttp.request(
-        "GET", f"{BASEURL}/v2/nations/{APIKEY}/&min_cities=2"
+        "GET", f"{BASEURL}/v2/nations/{APIKEY}/&min_cities=3"
     ) as response:
         data = await response.json()
         return data["data"]
