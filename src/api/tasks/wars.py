@@ -135,9 +135,9 @@ async def request4():
 @tasks.loop(minutes=2)
 async def fetch_wars():
     try:
-        min_war_attack_id = (await execute_read_query("SELECT max(id) FROM attacks;"))[
-            0
-        ][0]
+        # min_war_attack_id = (await execute_read_query("SELECT max(id) FROM attacks;"))[
+        #     0
+        # ][0]
         min_war_id = (
             await execute_read_query(
                 "SELECT min(id) FROM wars WHERE date >= $1;",
@@ -145,10 +145,10 @@ async def fetch_wars():
             )
         )[0][0]
         time = datetime.utcnow()
-        attacks = await request3(min_war_attack_id)
+        # attacks = await request3(min_war_attack_id)
         # data2 = data2["data"]["wars"]
         # data = [*data, *data2]
-        attacks = attacks["war_attacks"]
+        # attacks = attacks["war_attacks"]
         # data4 = data4["data"]["wars"]
         # data3 = [*data3, *data4]
         wars = {
@@ -210,49 +210,49 @@ async def fetch_wars():
                 {"min_id": min_war_id}, query, paginator=True
             ).batch(5)
         }
-        attacks = {
-            int(attack["war_attack_id"]): {
-                "id": int(attack["war_attack_id"]),
-                "war_id": int(attack["war_id"]),
-                "date": attack["date"],
-                "attack_type": attack["attack_type"],
-                "victor": int(attack["victor"]),
-                "success": int(attack["success"]),
-                "attcas1": int(attack["attcas1"]),
-                "defcas1": int(attack["defcas1"]),
-                "attcas2": int(attack["attcas2"]),
-                "defcas2": int(attack["defcas2"]),
-                "city_id": int(attack["city_id"]),
-                "infra_destroyed": float(attack["infra_destroyed"]),
-                "improvements_destroyed": int(attack["improvements_destroyed"]),
-                "money_looted": float(attack["money_looted"]),
-                "loot_info": attack["note"] if not attack["note"].isdigit() else None,
-                "resistance_eliminated": int(attack["note"])
-                if attack["note"].isdigit()
-                else None,
-                "city_infra_before": float(attack["city_infra_before"]),
-                "infra_destroyed_value": float(attack["infra_destroyed_value"]),
-                "attacker_munitions_used": float(attack["att_mun_used"]),
-                "defender_munitions_used": float(attack["def_mun_used"]),
-                "attacker_gasoline_used": float(attack["att_gas_used"]),
-                "defender_gasoline_used": float(attack["def_gas_used"]),
-                "aicraft_killed_by_tanks": int(attack["aircraft_killed_by_tanks"])
-                if attack["aircraft_killed_by_tanks"] is not None
-                else None,
-            }
-            for attack in attacks
-        }
-        attack_data = {}
+        # attacks = {
+        #     int(attack["war_attack_id"]): {
+        #         "id": int(attack["war_attack_id"]),
+        #         "war_id": int(attack["war_id"]),
+        #         "date": attack["date"],
+        #         "attack_type": attack["attack_type"],
+        #         "victor": int(attack["victor"]),
+        #         "success": int(attack["success"]),
+        #         "attcas1": int(attack["attcas1"]),
+        #         "defcas1": int(attack["defcas1"]),
+        #         "attcas2": int(attack["attcas2"]),
+        #         "defcas2": int(attack["defcas2"]),
+        #         "city_id": int(attack["city_id"]),
+        #         "infra_destroyed": float(attack["infra_destroyed"]),
+        #         "improvements_destroyed": int(attack["improvements_destroyed"]),
+        #         "money_looted": float(attack["money_looted"]),
+        #         "loot_info": attack["note"] if not attack["note"].isdigit() else None,
+        #         "resistance_eliminated": int(attack["note"])
+        #         if attack["note"].isdigit()
+        #         else None,
+        #         "city_infra_before": float(attack["city_infra_before"]),
+        #         "infra_destroyed_value": float(attack["infra_destroyed_value"]),
+        #         "attacker_munitions_used": float(attack["att_mun_used"]),
+        #         "defender_munitions_used": float(attack["def_mun_used"]),
+        #         "attacker_gasoline_used": float(attack["att_gas_used"]),
+        #         "defender_gasoline_used": float(attack["def_gas_used"]),
+        #         "aicraft_killed_by_tanks": int(attack["aircraft_killed_by_tanks"])
+        #         if attack["aircraft_killed_by_tanks"] is not None
+        #         else None,
+        #     }
+        #     for attack in attacks
+        # }
+        # attack_data = {}
         war_data = {}
         old_wars = await execute_read_query(
             "SELECT * FROM wars WHERE id >= $1;", min(wars)
         )
         old_wars = [dict(i) for i in old_wars]
         old_wars = {i["id"]: i for i in old_wars}
-        attack_dispatches = []
-        for attack in attacks.values():
-            attack_dispatches.append(attacks[attack["id"]])
-            attack_data[attack["id"]] = attack
+        # attack_dispatches = []
+        # for attack in attacks.values():
+        #     attack_dispatches.append(attacks[attack["id"]])
+        #     attack_data[attack["id"]] = attack
         declaration_dispatches = []
         updated_dispatches = []
         for after in wars.values():
@@ -337,22 +337,22 @@ async def fetch_wars():
         """,
             [tuple(i.values()) for i in war_data.values()],
         )
-        await execute_query_many(
-            """
-            INSERT INTO attacks (id, war_id, date, type, victor, success, attcas1,
-            defcas1, attcas2, defcas2, city_id, infra_destroyed, improvements_lost,
-            money_stolen, loot_info, resistance_eliminated, city_infra_before,
-            infra_destroyed_value, attacker_munitions_used, defender_munitions_used,
-            attacker_gasoline_used, defender_gasoline_used, aircraft_killed_by_tanks) VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-            $17, $18, $19, $20, $21, $22, $23)
-            ON CONFLICT (id) DO NOTHING;
-        """,
-            [tuple(i.values()) for i in attack_data.values()],
-        )
+        # await execute_query_many(
+        #     """
+        #     INSERT INTO attacks (id, war_id, date, type, victor, success, attcas1,
+        #     defcas1, attcas2, defcas2, city_id, infra_destroyed, improvements_lost,
+        #     money_stolen, loot_info, resistance_eliminated, city_infra_before,
+        #     infra_destroyed_value, attacker_munitions_used, defender_munitions_used,
+        #     attacker_gasoline_used, defender_gasoline_used, aircraft_killed_by_tanks) VALUES
+        #     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+        #     $17, $18, $19, $20, $21, $22, $23)
+        #     ON CONFLICT (id) DO NOTHING;
+        # """,
+        #     [tuple(i.values()) for i in attack_data.values()],
+        # )
         await UPDATE_TIMES.set_wars(time)
-        if attack_dispatches:
-            await dispatch("bulk_attack", str(time), data=attack_dispatches)
+        # if attack_dispatches:
+        #     await dispatch("bulk_attack", str(time), data=attack_dispatches)
         if declaration_dispatches:
             await dispatch("bulk_war_create", str(time), data=declaration_dispatches)
         if updated_dispatches:
